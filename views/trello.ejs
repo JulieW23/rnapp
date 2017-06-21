@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html ng-app="trello">
+  	<head>
+    	<title><%= title %></title>
+    	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    	<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    	<link rel='stylesheet' href='/stylesheets/style.css' />
+    	<link rel='stylesheet' href='/stylesheets/trello.css' />
+  	</head>
+
+  	<body ng-controller="trelloController">
+  		<div class="container">
+    		<h1><%= title %></h1>
+
+            <!-- Reload data button -->
+            <button class="btn" id="reload-button" onclick="reload()">Load Data</button>
+
+    		<!-- Board selection -->
+    		<form class="form-horizontal" id="boards_form">
+    			<div class="form-group">
+    				<label class="control-label">Choose your board</label>
+    				<select class="form-control" id="boards" ng-model="selectedBoard" ng-options="board.name for board in boardData" ng-change="boardSelected(selectedBoard.id)"></select>
+    			</div>
+    		</form>
+
+    		<!-- Display selected board title + link to Trello -->
+        	<h2 id = "hidden_board_link" style="display: none;">
+          		Go to <a href={{selectedBoard.shorturl}}>{{selectedBoard.name}}</a> board on Trello
+        	</h2>
+
+        	<!-- Tabs navigation -->
+        	<div class="tab" id="hidden_tab" style="display: none;">
+        		<button class="tablinks" ng-click="openTab(event, 'openItems', selectedBoard.id)">Active Items</button>
+        		<button class="tablinks" ng-click="openTab(event, 'archivedItems', selectedBoard.id)">Closed Items</button>
+            <button class="tablinks" ng-click="openTab(event, 'list-graph-tab', selectedBoard.id)">List Graphs</button>
+            <button class="tablinks" ng-click="openTab(event, 'distribution-graph-tab', selectedBoard.id)">Distribution Graphs</button>
+            <button class="tablinks" ng-click="openTab(event, 'distribution-table', selectedBoard.id)">Distribution Table</button>
+        	</div>
+
+        	<!-- Active Items Tab (displays all active items) -->
+        	<div id="openItems" class="tabcontent">
+        		<p>Active Items</p>
+        		<!-- Display all information in one table -->
+    			<table id="hidden_table1" style="display: none;">
+      				<tr>
+      					<!-- Each column of the table is an active list -->
+      					<th ng-repeat="list in openListData | filter:{'idboard':selectedBoard.id}">
+      						<h3>List: {{list.name}}</h3>
+      						Card count: {{filtered1.length}}
+      						<!-- Display all active cards under the list that they belong to -->
+      						<ul class="card_list_container" ng-repeat="card in openCardData | filter:{'idlist':list.id} as filtered1", id="card-ul">
+      							<li class="card_container">
+      								<a href={{card.shorturl}}><h4>Card: {{card.name}}</h4></a>
+      								<p id="card-details">
+      									Card due: {{card.due}}<br>
+      									<!-- Expandable display of each card's action history -->
+      									<button type="button" ng-click="getHistory(card.id)" class="history-button" data-toggle="collapse" data-target="#history{{card.id}}">Card History</button>
+      									<div id="history{{card.id}}" class="collapse">
+      										<!-- Created in list: <br>
+      										Time created:   -->
+      									</div>
+      								</p>
+      							</li>
+      						</ul>
+      					</th>
+      				</tr>
+      			</table>
+      		</div>
+
+      		<!-- Closed Items Tab -->
+      		<!-- Same structure as above, except it displays closed/archived items -->
+      		<div id="archivedItems" class="tabcontent">
+      			<p>Closed Items</p>
+    			<table id="hidden_table2" style="display: none;">
+      				<tr>
+      					<th ng-repeat="list in allListData | filter:{'idboard':selectedBoard.id}">
+      						<h3>List: {{list.name}}</h3>
+      						Card count: {{filtered2.length}}
+      						<ul class="card_list_container" ng-repeat="card in archivedCardData | filter:{'idlist':list.id} as filtered2", id="card-ul">
+      							<li class="card_container">
+      								<a href={{card.shorturl}}><h4>Card: {{card.name}}</h4></a>
+      								<p id="card-details">
+      									Card due: {{card.due}}<br>
+      									<!-- Time created: <br>
+      									Time entered current queue: <br> -->
+      									<button type="button" ng-click="getHistory(card.id)" class="history-button" data-toggle="collapse" data-target="#history{{card.id}}">Card History</button>
+      									<div id="history{{card.id}}" class="collapse">
+      									</div>
+      								</p>
+      							</li>
+      						</ul>
+      					</th>
+      				</tr>
+      			</table>
+      		</div>
+
+      		<!-- List Graph -->
+          	<div id="list-graph-tab" class="tabcontent" style="width:100%; height:400px;">
+            	<h4>Graphs for the average time that cards are in each list</h4>
+
+              <form>
+                From: <input type="date" name="from" id="listFromDate">
+                To: <input type="date" name="to" id="listToDate">
+                <input type="submit" ng-click="generateFigure(selectedBoard.id, 'list-graph-tab')">
+              </form>
+
+            	<div id="list-graph">
+            	</div>
+
+          	</div>
+
+            <!-- Distribution Graphs -->
+            <div id="distribution-graph-tab" class="tabcontent" style="width:100%; height:400px;">
+                <h4>Distribution graphs</h4>
+
+                <form>
+                  From: <input type="date" name="from" id="distributionFromDate">
+                  To: <input type="date" name="to" id="distributionToDate">
+                  <input type="submit" ng-click="generateFigure(selectedBoard.id, 'distribution-graph-tab')">
+                </form>
+
+                <div id="distribution-graph">
+                </div>
+            </div>
+
+            <!-- Distribution Table -->
+            <div id="distribution-table" class="tabcontent">
+              <h4>Time each card spends in each list (hours)</h4>
+              
+              <form>
+                From: <input type="date" name="from" id="tableFromDate">
+                To: <input type="date" name="to" id="tableToDate">
+                <input type="submit" ng-click="generateFigure(selectedBoard.id, 'distribution-table')">
+              </form>
+
+              <div id="table">
+              </div>
+
+            </div>
+
+    	</div>
+
+    	<!-- include jquery -->
+    	<script src="//code.jquery.com/jquery-2.2.4.min.js" type="text/javascript"></script>
+    	<!-- include bootstrap js -->
+    	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+   		<!-- include angular js -->
+    	<script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.6/angular.min.js"></script>
+    	<!-- include angular controller for this page -->
+    	<script src="javascripts/trelloController.js"></script>
+    	<!-- include trello client.js -->
+    	<script src="https://api.trello.com/1/client.js?key=5878cbde87e11ff40633bf73c28291e0"></script>
+    	<!-- include front end js -->
+    	<script src="javascripts/trello.js"></script>
+    	<!-- include highcharts scripts -->
+    	<script src="https://code.highcharts.com/highcharts.js"></script>
+		  <script src="https://code.highcharts.com/modules/exporting.js"></script>
+      <!-- Additional files for the Highslide popup effect -->
+      <script src="https://www.highcharts.com/media/com_demo/js/highslide-full.min.js"></script>
+      <script src="https://www.highcharts.com/media/com_demo/js/highslide.config.js" charset="utf-8"></script>
+      <!-- <link rel="stylesheet" type="text/css" href="https://www.highcharts.com/media/com_demo/css/highslide.css" /> -->
+
+  </body>
+
+</html>

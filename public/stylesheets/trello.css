@@ -1,0 +1,157 @@
+#reload-button {
+	float: right;
+	margin-bottom: 3px;
+}
+
+table, tr, th {
+	/*border: 3px solid black;
+	border-radius: 25px;*/
+	text-align: center;
+	vertical-align: top;
+}
+
+table {
+	width:100%;
+}
+
+#card-details {
+	font-size: 12px;
+}
+
+.card_list_container{ list-style-type: none; }
+
+.card_container {
+	border-radius: 10px;
+	background: #d4d4d4;
+	padding: 20px;
+	margin-right: 40px;
+	width: 300px;
+}
+
+#hidden_board_link {
+	text-align: center;
+}
+
+.history-button {
+	background:none!important;
+    color: black;
+    border:none; 
+    padding:0!important;
+    font: inherit;
+    cursor: pointer;
+}
+
+.history-button:hover {
+	/*border is optional*/
+    border-bottom:1px solid #444; 
+    border-color: black;
+}
+
+.collapse{
+	font-size: 12px;
+}
+
+div.tab {
+	overflow: hidden;
+	border: 1px solid #ccc;
+	background-color: #f1f1f1;
+}
+
+div.tab button {
+	background-color: inherit;
+	float: left;
+	border: none;
+	outline: none;
+	cursor: pointer;
+	padding: 14px 16px;
+	transition 0.3s;
+}
+
+div.tab button:hover {
+	background-color: #ddd;
+}
+
+div.tab button.active {
+	background-color: #ccc;
+}
+
+.tabcontent {
+	display: none;
+	padding: 6px 12px;
+	/*border: 1px solid #ccc;*/
+	/*border-top: none;*/
+	-webkit-animation: fadeEffect 1s;
+    animation: fadeEffect 1s; /* Fading effect takes 1 second */
+}
+
+@-webkit-keyframes fadeEffect {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+@keyframes fadeEffect {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+
+/*****************************************************************************/
+/* Styles for the HTML popups											     */
+/*****************************************************************************/
+.highslide-maincontent {
+	display: none;
+}
+.highslide-html {
+	background-color: white;
+}
+.highslide-html-content {
+	display: none;
+	width: 400px;
+	padding: 0 5px 5px 5px;
+}
+.highslide-header {
+	padding-bottom: 5px;
+}
+.highslide-header ul {
+	margin: 0;
+	padding: 0;
+	text-align: right;
+}
+.highslide-header ul li {
+	display: inline;
+	padding-left: 1em;
+}
+.highslide-header ul li.highslide-previous, .highslide-header ul li.highslide-next {
+	display: none;
+}
+.highslide-header a {
+	font-weight: bold;
+	color: gray;
+	text-transform: uppercase;
+	text-decoration: none;
+}
+.highslide-header a:hover {
+	color: black;
+}
+.highslide-header .highslide-move a {
+	cursor: move;
+}
+.highslide-footer {
+	height: 16px;
+}
+.highslide-footer .highslide-resize {
+	display: block;
+	float: right;
+	margin-top: 5px;
+	height: 11px;
+	width: 11px;
+	background: url(/media/com_demo/graphics/resize.gif) no-repeat;
+}
+.highslide-footer .highslide-resize span {
+	display: none;
+}
+.highslide-body {
+}
+.highslide-resize {
+	cursor: nw-resize;
+}
