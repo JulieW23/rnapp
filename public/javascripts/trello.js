@@ -73,6 +73,8 @@ function generateFigure(idBoard, tabName){
 		}
 	}
 	var num_days = (ms(toDate)-ms(fromDate))/86400000;
+	// lists id and name
+	var list_id_and_name = [];
 	// all list names
 	var list_names;
 	// all actions per list [[], [], [], ...]
@@ -108,6 +110,7 @@ function generateFigure(idBoard, tabName){
 				list_names[index] = list.name;
 				// append list name to table cell
 				table_cells[0].push(list.name);
+				list_id_and_name.push([list.id, list.name]);
 				// get actions for this list
 				$.get('/trello/actions_by_list/' + list.id + '/' + fromDate + '/' + toDate, function(data1){
 					list_actions[index] = new Array(data1.length);
@@ -190,6 +193,36 @@ function generateFigure(idBoard, tabName){
 							// check if the card is closed or not
 							// if closed, time = 0
 							// if open, time = ms(toDate) - ms(fromDate)
+							// ISSUE: CANNOT GET THE ASYNC STUFF TO WORK HERE
+							// new idea: somehow do it in the above section of code??????
+
+							// var cards_array = [];
+							// $.get('/trello/cards/list/' + list_id_and_name[i][0], function(cards){
+							// 	$.each(cards, function(index, card){
+							// 		cards_array.push(card.id);
+							// 	});
+							// 	console.log(cards_array);
+							// 	for(j = 0; j < cards_array.length; j++){
+							// 		if (idCard.indexOf(cards_array[j]) == -1){
+							// 			var action_storage;
+							// 			$.get('/trello/actions/most_recent/' + cards_array[j], function(action){
+							// 				action_storage = action[0];
+							// 			}).done(function(){
+							// 				console.log(list_names);
+							// 				console.log(i);
+							// 				if(action_storage.closed == true || action_storage.listbefore == list_names[i]){
+							// 					tTime.push(0);
+							// 					idCard.push(action_storage.idcard);
+							// 				}
+							// 				else{
+							// 					tTime.push((ms(toDate) - ms(fromDate))/3600000);
+							// 					idCard.push(action_storage.idcard);
+							// 				}
+							// 				console.log(tTime);
+							// 			});
+							// 		}
+							// 	}
+							// });
 
 							// *** preparing the processed data to be displayed ***
 							console.log(tTime);

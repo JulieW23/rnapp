@@ -122,6 +122,13 @@ router.get('/cards/:idBoard', (req, res, next) => {
     getHelper(req, res, next, qs);
 });
 
+/* GET cards by idList */
+router.get('/cards/list/:idList', (req, res, next) => {
+    const idList = req.params.idList;
+    const qs = "SELECT * FROM Card WHERE idList='" + idList + "'";
+    getHelper(req, res, next, qs);
+});
+
 /* POST a card */
 router.post('/cards', (req, res, next) => {
     const results = [];
@@ -202,6 +209,13 @@ router.get('/actions_by_list/:listid/:fromDate/:toDate', (req, res, next) => {
     const fromDate = req.params.fromDate;
     const toDate = req.params.toDate;
     const qs = "SELECT * FROM Action WHERE (createdInListId='" + listid + "' or listBeforeId='" + listid + "' or listAfterId='" + listid + "' or closedInListId='" + listid + "') and (date>'" + fromDate + "' and date<'" + toDate + "') order by idcard, date";
+    getHelper(req, res, next, qs);
+});
+
+/* GET most recent action for a given card id */
+router.get('/actions/most_recent/:idCard', (req, res, next) => {
+    const idCard = req.params.idCard;
+    const qs = "SELECT * FROM Action WHERE idCard='" + idCard + "' order by date desc limit 1";
     getHelper(req, res, next, qs);
 });
 
