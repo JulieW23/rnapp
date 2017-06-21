@@ -82,6 +82,7 @@ function generateFigure(idBoard, tabName){
 	// the distribution table as a 2d array
 	var table_cells = [['idCard', 'shorturl', 'Card']];
 	// array that stores card id + name + shorturl so that they can be matched (for distribution charts)
+	// [card.id, card.name, card.shorturl, card.idlist]
 	var card_id_and_name = [];
 	// get lists for this board
 	$.get('/trello/lists/' + idBoard, function(data){
@@ -94,7 +95,7 @@ function generateFigure(idBoard, tabName){
 				// for table_cells, for distribution table
 				var push = [card.id, card.shorturl, card.name];
 				// for distribution graphs
-				card_id_and_name.push([card.id, card.name, card.shorturl]);
+				card_id_and_name.push([card.id, card.name, card.shorturl, card.idlist]);
 				for (i=0; i < length; i++){
 					push.push('0');
 				}
@@ -134,6 +135,12 @@ function generateFigure(idBoard, tabName){
 							}
 							// for every action
 							for (j = 0; j < list_actions[i].length; j++){
+
+								// if the first action for a card is exiting the list, skip it
+								if (list_actions[i][j].listbefore == list_names[i] || list_actions[i][j].closed == true){
+									console.log(list_actions[i][j]);
+									j++;
+								}
 								// if this and next action are for the same card (even number j)
 								if (list_actions[i][j+1] && list_actions[i][j].idcard == list_actions[i][j+1].idcard){
 									time += (ms(list_actions[i][j+1].date) - ms(list_actions[i][j].date));
@@ -156,17 +163,34 @@ function generateFigure(idBoard, tabName){
 								}
 								// if there are no more actions for this card (even number j)
 								else {
-									time += (ms(toDate) - ms(list_actions[i][j].date));
-									tTime[k] = time/3600000;
-									idCard[k] = current_idCard;
-									// if there are still other actions after this
-									if(list_actions[i][j+1]){
-										current_idCard = list_actions[i][j+1].idcard;
+									// if the last action for this list is the first action of a card
+									// and that action is the card exiting the list
+									if (!list_actions[i][j]){
+										time = ms(list_actions[i][j-1].date) - ms(fromDate);
+										tTime[k] = time/3600000;
+										idCard[k] = current_idCard;
 									}
-									time = 0;
-									k++;
+									else {
+										time += (ms(toDate) - ms(list_actions[i][j].date));
+										tTime[k] = time/3600000;
+										idCard[k] = current_idCard;
+										// if there are still other actions after this
+										if(list_actions[i][j+1]){
+											current_idCard = list_actions[i][j+1].idcard;
+										}
+										time = 0;
+										k++;
+									}
 								}
 							}
+							// deal with cards in each list that had no actions within the timeframe
+							// idea:
+							// compare array idCard with complete array of card ids for this list
+							// for the cards that are missing from array idCard, get their most recent action
+							// check if the card is closed or not
+							// if closed, time = 0
+							// if open, time = ms(toDate) - ms(fromDate)
+
 							// *** preparing the processed data to be displayed ***
 							console.log(tTime);
 							console.log(idCard);
