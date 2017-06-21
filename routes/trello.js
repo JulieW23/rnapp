@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 const pg = require('pg');
 const path = require('path');
+const app = require('../app')
 const connectionString = process.env.DATABASE_URL || 'postgres://postgres:Pinkbird222@localhost:5432/rapidnovordb';
 
 /* GET users listing. */

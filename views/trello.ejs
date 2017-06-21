@@ -34,7 +34,7 @@
         		<button class="tablinks" ng-click="openTab(event, 'archivedItems', selectedBoard.id)">Closed Items</button>
             <button class="tablinks" ng-click="openTab(event, 'list-graph-tab', selectedBoard.id)">List Graphs</button>
             <button class="tablinks" ng-click="openTab(event, 'distribution-graph-tab', selectedBoard.id)">Distribution Graphs</button>
-            <button class="tablinks" ng-click="openTab(event, 'distribution-table', selectedBoard.id)">Distribution Table</button>
+            <button class="tablinks" ng-click="openTab(event, 'distribution-table', selectedBoard.id)">Cards Table</button>
         	</div>
 
         	<!-- Active Items Tab (displays all active items) -->
@@ -96,7 +96,7 @@
 
       		<!-- List Graph -->
           	<div id="list-graph-tab" class="tabcontent" style="width:100%; height:400px;">
-            	<h4>Graphs for the average time that cards are in each list</h4>
+            	<h4>Graphs for the average time that cards spend in each list</h4>
 
               <form>
                 From: <input type="date" name="from" id="listFromDate">

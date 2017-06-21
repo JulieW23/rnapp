@@ -22,7 +22,7 @@ function addMonths(date, months){
 
 // Process database data and generate the figure for the selected tab
 // ISSUE: DOESN'T WORK IF THERE HAS BEEN NO ACTIVITY IN THE LAST TIMEFRAME *****
-// ISSUE: WRONG LOGIC FOR SOME CASES WHEN CARDS ARE CLOSED/BECAUSE OF TIMEFRAME *****
+// ISSUE: WRONG LOGIC FOR CALCULATING DATA WHEN THE FIRST ACTION IS A CARD EXITING THE LIST *****
 function generateFigure(idBoard, tabName){
 	// process time range
 	var fromDate;
@@ -278,7 +278,7 @@ function generateFigure(idBoard, tabName){
         							},
        								xAxis: {
        									title: {
-       										text: 'Number of days'
+       										text: 'Number of days spent in this list'
         								},
            								categories: categories
         							},
