@@ -10,11 +10,11 @@
 * Create a database in PostgreSQL named 'rapidnovordb'. This can be done in the PostgreSQL shell with the command `create database rapidnovordb;` 
 * Edit the URL in the following files with your PostgreSQL information:
 
-   app.js line 14
+   app.js - line 14
    
-   /routes/trello.js line 6
+   /routes/trello.js - line 6
    
-   /models/trello.js line 2
+   /models/trello.js - line 2
    
    Format: `postgres://[someuser]:[somepassword]@[somehost]:[someport]/rapidnovordb`
    
