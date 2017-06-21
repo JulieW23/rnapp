@@ -8,7 +8,7 @@
 
 ## Setup
 * Create a database in PostgreSQL named 'rapidnovordb'. This can be done in the PostgreSQL shell with the command `create database rapidnovordb;` 
-* Edit the URL in files with your PostgreSQL information:
+* Edit the URL in the following files with your PostgreSQL information:
 
    app.js line 14
    
