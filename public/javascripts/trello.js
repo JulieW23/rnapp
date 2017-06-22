@@ -112,7 +112,7 @@ function generateFigure(idBoard, tabName){
 				table_cells[0].push(list.name);
 				list_id_and_name.push([list.id, list.name]);
 				// get actions for this list
-				$.get('/trello/actions_by_list/' + list.id + '/' + fromDate + '/' + toDate, function(data1){
+				$.get('/trello/actions_by_list/' + list.id, function(data1){
 					list_actions[index] = new Array(data1.length);
 					$.each(data1, function(index2, action){
 						list_actions[index][index2] = action;
@@ -138,54 +138,121 @@ function generateFigure(idBoard, tabName){
 							}
 							// for every action
 							for (j = 0; j < list_actions[i].length; j++){
-
-								// if the first action for a card is exiting the list, skip it
-								if (list_actions[i][j].listbefore == list_names[i] || list_actions[i][j].closed == true){
-									console.log(list_actions[i][j]);
-									j++;
-								}
-								// if this and next action are for the same card (even number j)
+								// if this and next action are for the same card
+								// ISSUE: CARDS ARE COUNTED AT 0 WHEN THEY SHOULD NOT BE COUNTED AT ALL
 								if (list_actions[i][j+1] && list_actions[i][j].idcard == list_actions[i][j+1].idcard){
-									time += (ms(list_actions[i][j+1].date) - ms(list_actions[i][j].date));
+									// if both actions are in the time range
+									if (list_actions[i][j].date >= fromDate && list_actions[i][j+1].date <= toDate){
+										console.log('case1');
+										time += (ms(list_actions[i][j+1].date) - ms(list_actions[i][j].date))/3600000;
+									}
+									// if the first action is in the time range but the second action is not
+									else if (list_actions[i][j].date >= fromDate && list_actions[i][j].date <= toDate && list_actions[i][j+1].date > toDate){
+										console.log(list_actions[i][j].date);
+										time += (ms(toDate) - ms(list_actions[i][j].date))/3600000;
+										console.log('case2');
+									}
+									// if the first action is not in the time range but the second action is
+									else if (list_actions[i][j].date < fromDate && list_actions[i][j+1].date >= fromDate && list_actions[i][j+1] <= toDate){
+										time += (ms(list_actions[i][j+1].date) - ms(fromDate))/3600000;
+										console.log('case3');
+									}
+									else if (list_actions[i][j].date < fromDate && list_actions[i][j+1].date > toDate){
+										console.log('case4');
+										time = (ms(toDate) - ms(fromDate))/3600000;
+									}
 									j++;
-									// if this and next action are for different cards (odd number j)
+									// if the next action is for a different card
 									if (list_actions[i][j+1] && list_actions[i][j].idcard != list_actions[i][j+1].idcard){
-										tTime[k] = time/3600000;
+										console.log('different card');
+										tTime[k] = time;
 										idCard[k] = current_idCard;
 										current_idCard = list_actions[i][j+1].idcard;
 										time = 0;
 										k++;
 									}
-									// if there are no more actions (odd number j)
+									// if there are no more actions
 									else if (!list_actions[i][j+1]){
-										tTime[k] = time/3600000;
+										console.log('no more actions');
+										tTime[k] = time;
 										idCard[k] = current_idCard;
-										time=0;
-										k++;
-									}
-								}
-								// if there are no more actions for this card (even number j)
-								else {
-									// if the last action for this list is the first action of a card
-									// and that action is the card exiting the list
-									if (!list_actions[i][j]){
-										time = ms(list_actions[i][j-1].date) - ms(fromDate);
-										tTime[k] = time/3600000;
-										idCard[k] = current_idCard;
-									}
-									else {
-										time += (ms(toDate) - ms(list_actions[i][j].date));
-										tTime[k] = time/3600000;
-										idCard[k] = current_idCard;
-										// if there are still other actions after this
-										if(list_actions[i][j+1]){
-											current_idCard = list_actions[i][j+1].idcard;
-										}
 										time = 0;
 										k++;
 									}
 								}
+								// if there is only one action left for a card
+								else {
+									// if the last action for the card is in the time range
+									// *** assuming this action is the card entering the list
+									if (list_actions[i][j].date <= toDate && list_actions[i][j].date >= fromDate){
+										console.log('last action for this card');
+										time += (ms(toDate) - ms(list_actions[i][j].date))/3600000;
+									}
+									// if the last action for this card is before the time range
+									// it should be the card entering the list, so the time = the time range
+									// ISSUE: something wrong with the if condition here ** not sure ?????
+									if (list_actions[i][j].date < fromDate){
+										console.log('last action is before time range');
+										time += (ms(toDate) - ms(fromDate))/3600000;
+									}
+									tTime[k] = time;
+									idCard[k] = current_idCard;
+									time = 0;
+									k++;
+									// if there are still actions for other cards
+									if (list_actions[i][j+1]){
+										current_idCard = list_actions[i][j+1].idcard;
+									}
+								}
+								// OLD CODE 
+								// if the first action for a card is exiting the list, skip it
+								// if (list_actions[i][j].listbefore == list_names[i] || list_actions[i][j].closed == true){
+								// 	console.log(list_actions[i][j]);
+								// 	j++;
+								// }
+								// // if this and next action are for the same card (even number j)
+								// if (list_actions[i][j+1] && list_actions[i][j].idcard == list_actions[i][j+1].idcard){
+								// 	time += (ms(list_actions[i][j+1].date) - ms(list_actions[i][j].date));
+								// 	j++;
+								// 	// if this and next action are for different cards (odd number j)
+								// 	if (list_actions[i][j+1] && list_actions[i][j].idcard != list_actions[i][j+1].idcard){
+								// 		tTime[k] = time/3600000;
+								// 		idCard[k] = current_idCard;
+								// 		current_idCard = list_actions[i][j+1].idcard;
+								// 		time = 0;
+								// 		k++;
+								// 	}
+								// 	// if there are no more actions (odd number j)
+								// 	else if (!list_actions[i][j+1]){
+								// 		tTime[k] = time/3600000;
+								// 		idCard[k] = current_idCard;
+								// 		time=0;
+								// 		k++;
+								// 	}
+								// }
+								// // if there are no more actions for this card (even number j)
+								// else {
+								// 	// if the last action for this list is the first action of a card
+								// 	// and that action is the card exiting the list
+								// 	if (!list_actions[i][j]){
+								// 		time = ms(list_actions[i][j-1].date) - ms(fromDate);
+								// 		tTime[k] = time/3600000;
+								// 		idCard[k] = current_idCard;
+								// 	}
+								// 	else {
+								// 		time += (ms(toDate) - ms(list_actions[i][j].date));
+								// 		tTime[k] = time/3600000;
+								// 		idCard[k] = current_idCard;
+								// 		// if there are still other actions after this
+								// 		if(list_actions[i][j+1]){
+								// 			current_idCard = list_actions[i][j+1].idcard;
+								// 		}
+								// 		time = 0;
+								// 		k++;
+								// 	}
+								// }
 							}
+							// ALTERNATIVE - PROBABLY DO NOT NEED THIS
 							// deal with cards in each list that had no actions within the timeframe
 							// idea:
 							// compare array idCard with complete array of card ids for this list
@@ -308,7 +375,6 @@ function generateFigure(idBoard, tabName){
 							$('#table').append(result);
 						}
 						// display distribution graph
-						// fix this
 						else if (tabName == 'distribution-graph-tab'){
     						$('#distribution-graph').empty();
     						for (i = 0; i < list_names.length; i++){
