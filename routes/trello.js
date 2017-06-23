@@ -38,7 +38,7 @@ function getHelper(req, res, next, queryString) {
 
 /* GET all boards */
 router.get('/boards', (req, res, next) => {
-    console.log('GET BOARDS!');
+    //console.log('GET BOARDS!');
     const qs = 'SELECT * FROM Board';
     getHelper(req, res, next, qs);
 });

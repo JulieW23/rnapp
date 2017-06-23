@@ -3,6 +3,24 @@ function reload(){
 }
 
 
+// Limits date picker so user cannot select future dates
+$(function(){
+    var dtToday = new Date();
+
+    var month = dtToday.getMonth() + 1;
+    var day = dtToday.getDate();
+    var year = dtToday.getFullYear();
+
+    if(month < 10)
+        month = '0' + month.toString();
+    if(day < 10)
+        day = '0' + day.toString();
+
+    var maxDate = year + '-' + month + '-' + day;    
+    $('.date_picker').attr('max', maxDate);
+});
+
+
 // Handle board selection: show hidden elements & retrieve list data fromt Trello
 function boardSelected(boardID) {
 	// show elements
@@ -21,8 +39,6 @@ function addMonths(date, months){
 
 
 // Process database data and generate the figure for the selected tab
-// ISSUE: DOESN'T WORK IF THERE HAS BEEN NO ACTIVITY IN THE LAST TIMEFRAME *****
-// ISSUE: WRONG LOGIC FOR CALCULATING DATA WHEN THE FIRST ACTION IS A CARD EXITING THE LIST *****
 function generateFigure(idBoard, tabName){
 	// process time range
 	var fromDate;
@@ -132,51 +148,68 @@ function generateFigure(idBoard, tabName){
 							// id of card (same order as tTime)
 							var idCard = [];
 							var k = 0;
-							var time = 0;
+							// Initial time is negative (=-1) to ensure that cards that do not 
+							// exist within the time range will not be counted in charts/tables.
+							// When the processed data from this section is being prepared for 
+							// displaying, any entry where the time is a negative value
+							// will be ignored
+							var time = -1;
 							if (list_actions[i].length > 0){
 								var current_idCard = list_actions[i][0].idcard;
 							}
 							// for every action
 							for (j = 0; j < list_actions[i].length; j++){
 								// if this and next action are for the same card
-								// ISSUE: CARDS ARE COUNTED AT 0 WHEN THEY SHOULD NOT BE COUNTED AT ALL
 								if (list_actions[i][j+1] && list_actions[i][j].idcard == list_actions[i][j+1].idcard){
 									// if both actions are in the time range
 									if (list_actions[i][j].date >= fromDate && list_actions[i][j+1].date <= toDate){
-										console.log('case1');
+										// console.log('case1');
+										if (time == -1){
+											time = 0;
+										}
 										time += (ms(list_actions[i][j+1].date) - ms(list_actions[i][j].date))/3600000;
 									}
 									// if the first action is in the time range but the second action is not
-									else if (list_actions[i][j].date >= fromDate && list_actions[i][j].date <= toDate && list_actions[i][j+1].date > toDate){
-										console.log(list_actions[i][j].date);
-										time += (ms(toDate) - ms(list_actions[i][j].date))/3600000;
-										console.log('case2');
-									}
+									// else if (list_actions[i][j].date >= fromDate && list_actions[i][j].date <= toDate && list_actions[i][j+1].date > toDate){
+									// 	if (time == -1){
+									// 		time = 0;
+									// 	}
+									// 	time += (ms(toDate) - ms(list_actions[i][j].date))/3600000;
+									// 	// console.log('case2');
+									// }
 									// if the first action is not in the time range but the second action is
-									else if (list_actions[i][j].date < fromDate && list_actions[i][j+1].date >= fromDate && list_actions[i][j+1] <= toDate){
-										time += (ms(list_actions[i][j+1].date) - ms(fromDate))/3600000;
-										console.log('case3');
-									}
-									else if (list_actions[i][j].date < fromDate && list_actions[i][j+1].date > toDate){
-										console.log('case4');
-										time = (ms(toDate) - ms(fromDate))/3600000;
-									}
+									// else if (list_actions[i][j].date < fromDate && list_actions[i][j+1].date >= fromDate && list_actions[i][j+1] <= toDate){
+									// 	if (time == -1){
+									// 		time = 0;
+									// 	}
+									// 	time += (ms(list_actions[i][j+1].date) - ms(fromDate))/3600000;
+									// 	// console.log('case3');
+									// }
+									// else if (list_actions[i][j].date < fromDate && list_actions[i][j+1].date > toDate){
+									// 	// console.log('case4');
+									// 	if (time == -1){
+									// 		time = 0;
+									// 	}
+									// 	time = (ms(toDate) - ms(fromDate))/3600000;
+									// }
+									// actions within the time range for the same cards
+									// should be processed in pairs
 									j++;
 									// if the next action is for a different card
 									if (list_actions[i][j+1] && list_actions[i][j].idcard != list_actions[i][j+1].idcard){
-										console.log('different card');
+										// console.log('different card');
 										tTime[k] = time;
 										idCard[k] = current_idCard;
 										current_idCard = list_actions[i][j+1].idcard;
-										time = 0;
+										time = -1;
 										k++;
 									}
 									// if there are no more actions
 									else if (!list_actions[i][j+1]){
-										console.log('no more actions');
+										// console.log('no more actions');
 										tTime[k] = time;
 										idCard[k] = current_idCard;
-										time = 0;
+										time = -1;
 										k++;
 									}
 								}
@@ -184,116 +217,30 @@ function generateFigure(idBoard, tabName){
 								else {
 									// if the last action for the card is in the time range
 									// *** assuming this action is the card entering the list
-									if (list_actions[i][j].date <= toDate && list_actions[i][j].date >= fromDate){
-										console.log('last action for this card');
-										time += (ms(toDate) - ms(list_actions[i][j].date))/3600000;
-									}
+									// if (list_actions[i][j].date <= toDate && list_actions[i][j].date >= fromDate){
+									// 	// console.log('last action for this card');
+									// 	time += (ms(toDate) - ms(list_actions[i][j].date))/3600000;
+									// }
 									// if the last action for this card is before the time range
 									// it should be the card entering the list, so the time = the time range
-									// ISSUE: something wrong with the if condition here ** not sure ?????
-									if (list_actions[i][j].date < fromDate){
-										console.log('last action is before time range');
-										time += (ms(toDate) - ms(fromDate))/3600000;
-									}
+									// if (list_actions[i][j].date < fromDate){
+									// 	// console.log('last action is before time range');
+									// 	time += (ms(toDate) - ms(fromDate))/3600000;
+									// }
 									tTime[k] = time;
 									idCard[k] = current_idCard;
-									time = 0;
+									time = -1;
 									k++;
 									// if there are still actions for other cards
 									if (list_actions[i][j+1]){
 										current_idCard = list_actions[i][j+1].idcard;
 									}
 								}
-								// OLD CODE 
-								// if the first action for a card is exiting the list, skip it
-								// if (list_actions[i][j].listbefore == list_names[i] || list_actions[i][j].closed == true){
-								// 	console.log(list_actions[i][j]);
-								// 	j++;
-								// }
-								// // if this and next action are for the same card (even number j)
-								// if (list_actions[i][j+1] && list_actions[i][j].idcard == list_actions[i][j+1].idcard){
-								// 	time += (ms(list_actions[i][j+1].date) - ms(list_actions[i][j].date));
-								// 	j++;
-								// 	// if this and next action are for different cards (odd number j)
-								// 	if (list_actions[i][j+1] && list_actions[i][j].idcard != list_actions[i][j+1].idcard){
-								// 		tTime[k] = time/3600000;
-								// 		idCard[k] = current_idCard;
-								// 		current_idCard = list_actions[i][j+1].idcard;
-								// 		time = 0;
-								// 		k++;
-								// 	}
-								// 	// if there are no more actions (odd number j)
-								// 	else if (!list_actions[i][j+1]){
-								// 		tTime[k] = time/3600000;
-								// 		idCard[k] = current_idCard;
-								// 		time=0;
-								// 		k++;
-								// 	}
-								// }
-								// // if there are no more actions for this card (even number j)
-								// else {
-								// 	// if the last action for this list is the first action of a card
-								// 	// and that action is the card exiting the list
-								// 	if (!list_actions[i][j]){
-								// 		time = ms(list_actions[i][j-1].date) - ms(fromDate);
-								// 		tTime[k] = time/3600000;
-								// 		idCard[k] = current_idCard;
-								// 	}
-								// 	else {
-								// 		time += (ms(toDate) - ms(list_actions[i][j].date));
-								// 		tTime[k] = time/3600000;
-								// 		idCard[k] = current_idCard;
-								// 		// if there are still other actions after this
-								// 		if(list_actions[i][j+1]){
-								// 			current_idCard = list_actions[i][j+1].idcard;
-								// 		}
-								// 		time = 0;
-								// 		k++;
-								// 	}
-								// }
 							}
-							// ALTERNATIVE - PROBABLY DO NOT NEED THIS
-							// deal with cards in each list that had no actions within the timeframe
-							// idea:
-							// compare array idCard with complete array of card ids for this list
-							// for the cards that are missing from array idCard, get their most recent action
-							// check if the card is closed or not
-							// if closed, time = 0
-							// if open, time = ms(toDate) - ms(fromDate)
-							// ISSUE: CANNOT GET THE ASYNC STUFF TO WORK HERE
-							// new idea: somehow do it in the above section of code??????
-
-							// var cards_array = [];
-							// $.get('/trello/cards/list/' + list_id_and_name[i][0], function(cards){
-							// 	$.each(cards, function(index, card){
-							// 		cards_array.push(card.id);
-							// 	});
-							// 	console.log(cards_array);
-							// 	for(j = 0; j < cards_array.length; j++){
-							// 		if (idCard.indexOf(cards_array[j]) == -1){
-							// 			var action_storage;
-							// 			$.get('/trello/actions/most_recent/' + cards_array[j], function(action){
-							// 				action_storage = action[0];
-							// 			}).done(function(){
-							// 				console.log(list_names);
-							// 				console.log(i);
-							// 				if(action_storage.closed == true || action_storage.listbefore == list_names[i]){
-							// 					tTime.push(0);
-							// 					idCard.push(action_storage.idcard);
-							// 				}
-							// 				else{
-							// 					tTime.push((ms(toDate) - ms(fromDate))/3600000);
-							// 					idCard.push(action_storage.idcard);
-							// 				}
-							// 				console.log(tTime);
-							// 			});
-							// 		}
-							// 	}
-							// });
 
 							// *** preparing the processed data to be displayed ***
-							console.log(tTime);
-							console.log(idCard);
+							// console.log(tTime);
+							// console.log(idCard);
 							// generate x axis categories for distribution graphs
 							var categories = [];
 							var zeros = [];
@@ -306,26 +253,32 @@ function generateFigure(idBoard, tabName){
 
 							distribution_data[i] = list_data;
 
-							// store data for chart
-							display_time[i] = tTime.reduce(add, 0) / tTime.length;
 							// store data for table
 							// for every entry in tTime/for every idcard
 							for (m = 0; m < tTime.length; m++){
+								// data for distribution chart
+								if (tTime[m] >= 0){
+									var hours_to_days = Math.round(tTime[m]/24);
+									distribution_data[i][hours_to_days].y ++;
+									distribution_data[i][hours_to_days].cards.push(idCard[m]);
+								}
+								// change -1 to 0 for table + list chart
+								else if (tTime[m] < 0){
+									tTime[m] = 0;
+								}
 								// for every row of table
 								for(n = 1; n < table_cells.length; n++){
 									if (idCard[m] == table_cells[n][0]){
-										table_cells[n][i+3] = Math.round(tTime[m] * 10) / 10;
+										table_cells[n][i+3] = Math.round(tTime[m] * 100) / 100;
 									}
 								}
-								// data for distribution chart
-								var hours_to_days = Math.round(tTime[m]/24);
-								distribution_data[i][hours_to_days].y ++;
-								distribution_data[i][hours_to_days].cards.push(idCard[m]);
-							}	
+							}
+							// store data for list chart
+							display_time[i] = tTime.reduce(add, 0) / tTime.length;	
 						}
 						// *** displaying the required chart ***
-						console.log(display_time);
-						console.log(table_cells);
+						// console.log(display_time);
+						// console.log(table_cells);
 						// display list chart
 						if (tabName == 'list-graph-tab'){
 							var listChart = Highcharts.chart('list-graph', {
@@ -347,6 +300,8 @@ function generateFigure(idBoard, tabName){
        								}
        							},
         						series: [{
+        							showInLegend: false,
+        							name: 'Average # hours',
             						data: display_time
         						}]
     						});	
@@ -358,7 +313,6 @@ function generateFigure(idBoard, tabName){
 							for (x = 0; x < table_cells.length; x++){
 								result += "<tr>";
 								for (y = 2; y < table_cells[x].length; y++){
-									// ISSUE: let card column link to each card on trello
 									if(y==2 && x>0){
 										result += "<td style='border: 1px solid black'><a href='" 
 										+ table_cells[x][1] + "'>" 
@@ -436,13 +390,34 @@ function generateFigure(idBoard, tabName){
        									}
        								},
         							series: [{
+        								showInLegend: false,
             							name: ' ',
             							data: distribution_data[i]
         							}]
     							});
+    							// CALCULATE AVERAGE
+    							var data_array = [];
+    							for (j = 0; j < distribution_data[i].length; j++){
+    								if (distribution_data[i][j].y > 0){
+    									for (x = 0; x < distribution_data[i][j].y; x++){
+    										data_array.push(j);
+    									}
+    								}
+    							}
+    							var average;
+    							average = Math.round((data_array.reduce(add, 0) / data_array.length) * 100) / 100;
+    							$('#distribution-graph' + [i]).append('<h4 style="text-align: center;">Average: ' + average + ' days </h4>');
+    							
+    							// CALCULATE STANDARD DEVIATION
+    							var squared_difference = [];
+    							for (j = 0; j < data_array.length; j++){
+    								squared_difference.push((data_array[j] - average) * (data_array[j] - average));
+    							}
+    							var standard_deviation = Math.round((Math.sqrt(squared_difference.reduce(add, 0) / squared_difference.length) * 100)) / 100;
+    							$('#distribution-graph' + [i]).append('<h4 style="text-align: center;">Standard Deviation: ' + standard_deviation + ' days</h4><br><br>');
     						}
-    						console.log(distribution_data);
-    						console.log(card_id_and_name);
+    						// console.log(distribution_data);
+    						// console.log(card_id_and_name);
 						}
 					}
 				});
@@ -535,4 +510,3 @@ function getHistory(idCard) {
 		}
 	});
 }
-

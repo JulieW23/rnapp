@@ -1,11 +1,13 @@
+body {
+	min-width: 765px;
+}
+
 #reload-button {
 	float: right;
 	margin-bottom: 3px;
 }
 
 table, tr, th {
-	/*border: 3px solid black;
-	border-radius: 25px;*/
 	text-align: center;
 	vertical-align: top;
 }

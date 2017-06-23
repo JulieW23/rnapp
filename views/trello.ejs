@@ -99,8 +99,8 @@
             	<h4>Graphs for the average time that cards spend in each list</h4>
 
               <form>
-                From: <input type="date" name="from" id="listFromDate">
-                To: <input type="date" name="to" id="listToDate">
+                From: <input type="date" name="from" id="listFromDate" class="date_picker">
+                To: <input type="date" name="to" id="listToDate" class="date_picker">
                 <input type="submit" ng-click="generateFigure(selectedBoard.id, 'list-graph-tab')">
               </form>
 
@@ -114,8 +114,8 @@
                 <h4>Distribution graphs</h4>
 
                 <form>
-                  From: <input type="date" name="from" id="distributionFromDate">
-                  To: <input type="date" name="to" id="distributionToDate">
+                  From: <input type="date" name="from" id="distributionFromDate" class="date_picker">
+                  To: <input type="date" name="to" id="distributionToDate" class="date_picker">
                   <input type="submit" ng-click="generateFigure(selectedBoard.id, 'distribution-graph-tab')">
                 </form>
 
@@ -128,8 +128,8 @@
               <h4>Time each card spends in each list (hours)</h4>
               
               <form>
-                From: <input type="date" name="from" id="tableFromDate">
-                To: <input type="date" name="to" id="tableToDate">
+                From: <input type="date" name="from" id="tableFromDate" class="date_picker">
+                To: <input type="date" name="to" id="tableToDate" class="date_picker">
                 <input type="submit" ng-click="generateFigure(selectedBoard.id, 'distribution-table')">
               </form>
 
@@ -158,7 +158,6 @@
       <!-- Additional files for the Highslide popup effect -->
       <script src="https://www.highcharts.com/media/com_demo/js/highslide-full.min.js"></script>
       <script src="https://www.highcharts.com/media/com_demo/js/highslide.config.js" charset="utf-8"></script>
-      <!-- <link rel="stylesheet" type="text/css" href="https://www.highcharts.com/media/com_demo/css/highslide.css" /> -->
 
   </body>
 
