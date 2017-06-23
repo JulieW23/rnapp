@@ -1,5 +1,7 @@
 const pg = require('pg');
-const connectionString = process.env.DATABASE_URL || 'postgres://postgres:Pinkbird222@localhost:5432/rapidnovordb';
+var config = require("../config.js");
+const connectionString = config.databaseURL;
+//const connectionString = process.env.DATABASE_URL || 'postgres://postgres:Pinkbird222@localhost:5432/rapidnovordb';
 
 const client = new pg.Client(connectionString);
 client.connect();

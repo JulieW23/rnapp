@@ -11,7 +11,12 @@ var url = require('url');
 
 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 const pg = require('pg');
-const connectionString = process.env.DATABASE_URL || 'postgres://postgres:Pinkbird222@localhost:5432/rapidnovordb';
+
+var config = require("./config.js");
+
+
+const connectionString = config.databaseURL;
+//const connectionString = process.env.DATABASE_URL || 'postgres://postgres:Pinkbird222@localhost:5432/rapidnovordb';
 
 
 // ***********************************
@@ -35,7 +40,8 @@ const trelloKey = "5878cbde87e11ff40633bf73c28291e0";
 const trelloSecret = "c6fa27b49e16e4b339e9253082783e2d8713f80b31bf454bf52d7b1a83ad6a1d";
 
 // Trello redirects the user here after authentication
-const trelloLoginCallback = "http://localhost:3000/trello";
+const trelloLoginCallback = config.trelloLoginCallback + "/trello";
+//const trelloLoginCallback = "http://localhost:3000/trello";
 
 // You should {"token": "tokenSecret"} pairs in a real application
 // Storage should be more permanent (redis would be a good choice)

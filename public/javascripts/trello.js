@@ -20,6 +20,12 @@ $(function(){
     $('.date_picker').attr('max', maxDate);
 });
 
+$(function(){
+	if($('.date_picker')[0].type != 'date'){
+		$('.date_picker').datepicker({dateFormat: "yy-mm-dd"});
+	}
+});
+
 
 // Handle board selection: show hidden elements & retrieve list data fromt Trello
 function boardSelected(boardID) {
@@ -88,6 +94,7 @@ function generateFigure(idBoard, tabName){
 			toDate = document.getElementById("listToDate").value;
 		}
 	}
+	console.log(fromDate);
 	var num_days = (ms(toDate)-ms(fromDate))/86400000;
 	// lists id and name
 	var list_id_and_name = [];
