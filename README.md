@@ -8,15 +8,12 @@
 
 ## Setup
 * Create a database in PostgreSQL named 'rapidnovordb'. This can be done in the PostgreSQL shell with the command `create database rapidnovordb;` 
-* Edit the URL in the following files with your PostgreSQL information:
+* Edit the PostgreSQL and Trello login callback URLs in config.js:
 
-   app.js - line 14
+   * PostgreSQL
    
-   /routes/trello.js - line 6
+      Format: `postgres://[someuser]:[somepassword]@[somehost]:[someport]/rapidnovordb`
    
-   /models/trello.js - line 2
-   
-   Format: `postgres://[someuser]:[somepassword]@[somehost]:[someport]/rapidnovordb`
    
 * In the root directory of the project, run commands
 
