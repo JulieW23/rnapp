@@ -261,11 +261,11 @@ var callback = function(request, response) {
       			});
         		// get actions for the last 2 years
             //getActionsHelper(one_month_ago, present.toISOString(), boards[i].id, accessToken, accessTokenSecret);
-            getActionsHelper(eight_months_ago, four_months_ago, boards[i].id, accessToken, accessTokenSecret);
-            getActionsHelper(one_year_ago, eight_months_ago, boards[i].id, accessToken, accessTokenSecret);
-            getActionsHelper(sixteen_months_ago, one_year_ago, boards[i].id, accessToken, accessTokenSecret);
-            getActionsHelper(twenty_months_ago, sixteen_months_ago, boards[i].id, accessToken, accessTokenSecret);
-            getActionsHelper(two_years_ago, twenty_months_ago, boards[i].id, accessToken, accessTokenSecret);
+            // getActionsHelper(eight_months_ago, four_months_ago, boards[i].id, accessToken, accessTokenSecret);
+            // getActionsHelper(one_year_ago, eight_months_ago, boards[i].id, accessToken, accessTokenSecret);
+            // getActionsHelper(sixteen_months_ago, one_year_ago, boards[i].id, accessToken, accessTokenSecret);
+            // getActionsHelper(twenty_months_ago, sixteen_months_ago, boards[i].id, accessToken, accessTokenSecret);
+            // getActionsHelper(two_years_ago, twenty_months_ago, boards[i].id, accessToken, accessTokenSecret);
             //getActionsHelper(twentyone_months_ago, eighteen_months_ago, boards[i].id, accessToken, accessTokenSecret);
             //getActionsHelper(two_years_ago, twentyone_months_ago, boards[i].id, accessToken, accessTokenSecret);
             // get actions for the last 3 months until present
@@ -273,10 +273,14 @@ var callback = function(request, response) {
             + boards[i].id + 
             "/actions?filter=updateCard:idList,updateCard:closed,createCard&since=" 
             + four_months_ago + "&key=" + trelloKey + "&token=" + accessToken);
+            // oauth.getProtectedResource("https://api.trello.com/1/boards/" 
+            // + boards[i].id + 
+            // "/actions?filter=updateCard:idList,updateCard:closed,createCard&since=" 
+            // + four_months_ago, "GET", accessToken, accessTokenSecret, 
+            // function(error, data, response){
             oauth.getProtectedResource("https://api.trello.com/1/boards/" 
             + boards[i].id + 
-            "/actions?filter=updateCard:idList,updateCard:closed,createCard&since=" 
-            + four_months_ago, "GET", accessToken, accessTokenSecret, 
+            "/actions?filter=updateCard:idList,updateCard:closed,createCard", "GET", accessToken, accessTokenSecret, 
             function(error, data, response){
                 // console.log('GET ACTIONS');
                 var actions = JSON.parse(data);
