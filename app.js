@@ -16,6 +16,7 @@ var config = require("./config.js");
 
 
 const connectionString = config.databaseURL;
+const client = new pg.Client(connectionString);
 //const connectionString = process.env.DATABASE_URL || 'postgres://postgres:Pinkbird222@localhost:5432/rapidnovordb';
 
 
@@ -188,7 +189,7 @@ const login = function(req, res) {
 };
 
 var callback = function(request, response) {
-  	const client = new pg.Client(connectionString);
+  	// const client = new pg.Client(connectionString);
   	// get current time
   	var present = new Date();
     console.log('PRESENT DATE: ' + present);
@@ -210,6 +211,8 @@ var callback = function(request, response) {
     console.log('six_months_ago: ' + six_months_ago);
     var four_months_ago = addMonths(new Date(), -4).toISOString();
     console.log('four months ago: ' + four_months_ago);
+    var one_month_ago = addMonths(new Date(), -1).toISOString();
+    console.log('one month ago: ' + one_month_ago);
     //var three_months_ago = addMonths(present, -3).toISOString();
 
   	callback_check = 2;
@@ -257,6 +260,7 @@ var callback = function(request, response) {
       				}
       			});
         		// get actions for the last 2 years
+            //getActionsHelper(one_month_ago, present.toISOString(), boards[i].id, accessToken, accessTokenSecret);
             getActionsHelper(eight_months_ago, four_months_ago, boards[i].id, accessToken, accessTokenSecret);
             getActionsHelper(one_year_ago, eight_months_ago, boards[i].id, accessToken, accessTokenSecret);
             getActionsHelper(sixteen_months_ago, one_year_ago, boards[i].id, accessToken, accessTokenSecret);
