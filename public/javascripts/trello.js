@@ -164,8 +164,10 @@ function generateFigure(idBoard, tabName){
 							if (list_actions[i].length > 0){
 								var current_idCard = list_actions[i][0].idcard;
 							}
+							console.log(list_actions[i]);
 							// for every action
 							for (j = 0; j < list_actions[i].length; j++){
+								console.log(list_actions[i][j]);
 								// if this and next action are for the same card
 								if (list_actions[i][j+1] && list_actions[i][j].idcard == list_actions[i][j+1].idcard){
 									// if both actions are in the time range
@@ -175,30 +177,31 @@ function generateFigure(idBoard, tabName){
 											time = 0;
 										}
 										time += (ms(list_actions[i][j+1].date) - ms(list_actions[i][j].date))/3600000;
+										console.log(time);
 									}
 									// if the first action is in the time range but the second action is not
 									else if (list_actions[i][j].date >= fromDate && list_actions[i][j].date <= toDate && list_actions[i][j+1].date > toDate){
-										if (time == -1){
-											time = 0;
-										}
+										// if (time == -1){
+										// 	time = 0;
+										// }
 										// time += (ms(toDate) - ms(list_actions[i][j].date))/3600000;
 										time += 0;
 										// console.log('case2');
 									}
 									// if the first action is not in the time range but the second action is
 									else if (list_actions[i][j].date < fromDate && list_actions[i][j+1].date >= fromDate && list_actions[i][j+1] <= toDate){
-										if (time == -1){
-											time = 0;
-										}
+										// if (time == -1){
+										// 	time = 0;
+										// }
 										// time += (ms(list_actions[i][j+1].date) - ms(fromDate))/3600000;
 										time += 0;
 										// console.log('case3');
 									}
 									else if (list_actions[i][j].date < fromDate && list_actions[i][j+1].date > toDate){
 										// console.log('case4');
-										if (time == -1){
-											time = 0;
-										}
+										// if (time == -1){
+										// 	time = 0;
+										// }
 										// time = (ms(toDate) - ms(fromDate))/3600000;
 										time += 0;
 									}
@@ -267,6 +270,7 @@ function generateFigure(idBoard, tabName){
 
 							// store data for table
 							// for every entry in tTime/for every idcard
+							console.log(list_names[i] + ": " + tTime);
 							for (m = 0; m < tTime.length; m++){
 								// data for distribution chart
 								if (tTime[m] >= 0){
@@ -378,6 +382,7 @@ function generateFigure(idBoard, tabName){
 									// console.log(categories[j]);
 									j--;
 								}
+								console.log(distribution_data[i]);
 
     							$('#distribution-graph').append("<div id='distribution-graph" + [i] 
     								+ "'></div>");
@@ -439,6 +444,7 @@ function generateFigure(idBoard, tabName){
     									}
     								}
     							}
+    							console.log(data_array);
     							var average;
     							average = Math.round((data_array.reduce(add, 0) / data_array.length) * 100) / 100;
     							if (!(average >= 0)){
