@@ -62,16 +62,18 @@ function getActionsHelper(since, before, boardID, accessToken, accessTokenSecret
   "/actions?filter=updateCard:idList,updateCard:closed,createCard&since=" 
   + since + '&before=' + before, "GET", accessToken, accessTokenSecret, 
   function(error, data, response){
+    //console.log('actions since ' + since + 'until ' + before);
     // console.log('GET ACTIONS');
     var actions = JSON.parse(data);
     var action_nothing = 1;
     for (i=0; i < actions.length; i++){
       if(actions[i].type == 'createCard'){
+        console.log('card created: "' + actions[i].data.card.name + '" at time: ' + actions[i].date);
         client.query("INSERT INTO Action VALUES ($1, $2, $3, $4, $5, NULL, NULL, NULL, $6, NULL, NULL, NULL, NULL)", 
         [actions[i].id, actions[i].data.card.id, actions[i].date, actions[i].type, actions[i].data.list.name, 
         actions[i].data.list.id], function(err, result){
           if(err){
-            //console.log("error: " + err);
+            console.log("error: " + err);
             action_nothing = 1;
           }
         });
@@ -82,7 +84,7 @@ function getActionsHelper(since, before, boardID, accessToken, accessTokenSecret
             [actions[i].id, actions[i].data.card.id, actions[i].date, actions[i].type, actions[i].data.list.name, 
             actions[i].data.list.id, actions[i].data.card.closed], function(err, result){
               if(err){
-                // console.log("error: " + err);
+                console.log("error: " + err);
                 action_nothing = 1;
               }
           });
@@ -93,7 +95,7 @@ function getActionsHelper(since, before, boardID, accessToken, accessTokenSecret
           actions[i].data.listBefore.name, actions[i].data.listAfter.name, actions[i].data.listBefore.id, 
           actions[i].data.listAfter.id], function(err, result){
             if(err){
-              // console.log("error: " + err);
+              console.log("error: " + err);
               action_nothing = 1;
             }
           });
@@ -112,6 +114,7 @@ function getUnarchivedCardsHelper(since, before, listID, accessToken, accessToke
     var cards = JSON.parse(data);
     var card_nothing = 1;
     for(i=0; i < cards.length; i++){
+      //console.log("card name:" + cards[i].name);
       if (cards[i].due == null){
         client.query("INSERT INTO Card VALUES ($1, $2, $3, NULL, $4, $5, $6, NULL, $7, $8)", 
         [cards[i].id, cards[i].name, cards[i].desc, cards[i].dueComplete, cards[i].idBoard, 
@@ -147,6 +150,7 @@ function getArchivedCardsHelper(since, before, listID, accessToken, accessTokenS
     var cards = JSON.parse(data);
     var card_nothing = 1;
     for(i=0; i < cards.length; i++){
+      //console.log("card name:" + cards[i].name);
       if (cards[i].due == null){
         client.query("INSERT INTO Card VALUES ($1, $2, $3, NULL, $4, $5, $6, NULL, $7, $8)", 
         [cards[i].id, cards[i].name, cards[i].desc, cards[i].dueComplete, cards[i].idBoard, 
@@ -187,17 +191,25 @@ var callback = function(request, response) {
   	const client = new pg.Client(connectionString);
   	// get current time
   	var present = new Date();
-    var two_years_ago = addMonths(present, -24).toISOString();
+    console.log('PRESENT DATE: ' + present);
+    var two_years_ago = addMonths(new Date(), -24).toISOString();
+    console.log('2 years ago: ' + two_years_ago);
     //var twentyone_months_ago = addMonths(present, -21).toISOString();
-    var twenty_months_ago = addMonths(present, -20).toISOString();
+    var twenty_months_ago = addMonths(new Date(), -20).toISOString();
+    console.log('twenty months ago: ' + twenty_months_ago);
     // var eighteen_months_ago = addMonths(present, -18).toISOString();
-    var sixteen_months_ago = addMonths(present, -16).toISOString();
+    var sixteen_months_ago = addMonths(new Date(), -16).toISOString();
+    console.log('sixteen months ago: ' + sixteen_months_ago);
     //var fifteen_months_ago = addMonths(present, -15).toISOString();
-    var one_year_ago = addMonths(present, -12).toISOString();
+    var one_year_ago = addMonths(new Date(), -12).toISOString();
+    console.log('one year ago: ' + one_year_ago);
     //var nine_months_ago = addMonths(present, -9).toISOString();
-    var eight_months_ago = addMonths(present, -8).toISOString();
-  	var six_months_ago = addMonths(present, -6).toISOString();
-    var four_months_ago = addMonths(present, -4).toISOString();
+    var eight_months_ago = addMonths(new Date(), -8).toISOString();
+    console.log('eight months ago: ' + eight_months_ago);
+  	var six_months_ago = addMonths(new Date(), -6).toISOString();
+    console.log('six_months_ago: ' + six_months_ago);
+    var four_months_ago = addMonths(new Date(), -4).toISOString();
+    console.log('four months ago: ' + four_months_ago);
     //var three_months_ago = addMonths(present, -3).toISOString();
 
   	callback_check = 2;
@@ -263,11 +275,12 @@ var callback = function(request, response) {
                 var action_nothing = 1;
                 for (i=0; i < actions.length; i++){
                   if(actions[i].type == 'createCard'){
+                    console.log('card created: "' + actions[i].data.card.name + '" at time: ' + actions[i].date);
                       client.query("INSERT INTO Action VALUES ($1, $2, $3, $4, $5, NULL, NULL, NULL, $6, NULL, NULL, NULL, NULL)", 
                       [actions[i].id, actions[i].data.card.id, actions[i].date, actions[i].type, actions[i].data.list.name, 
                       actions[i].data.list.id], function(err, result){
                         if(err){
-                            //console.log("error: " + err);
+                            console.log("error: " + err);
                             action_nothing = 1;
                         }
                       });
@@ -278,7 +291,7 @@ var callback = function(request, response) {
                         [actions[i].id, actions[i].data.card.id, actions[i].date, actions[i].type, actions[i].data.list.name, 
                         actions[i].data.list.id, actions[i].data.card.closed], function(err, result){
                             if(err){
-                              // console.log("error: " + err);
+                              console.log("error: " + err);
                               action_nothing = 1;
                             }
                         });
@@ -289,7 +302,7 @@ var callback = function(request, response) {
                         actions[i].data.listBefore.name, actions[i].data.listAfter.name, actions[i].data.listBefore.id, 
                         actions[i].data.listAfter.id], function(err, result){
                             if(err){
-                              // console.log("error: " + err);
+                              console.log("error: " + err);
                               action_nothing = 1;
                             }
                         });
@@ -322,6 +335,7 @@ var callback = function(request, response) {
               				var cards = JSON.parse(data);
               				var card_nothing = 1;
               				for(i=0; i < cards.length; i++){
+                        //console.log("card name:" + cards[i].name);
                 				if (cards[i].due == null){
                         		client.query("INSERT INTO Card VALUES ($1, $2, $3, NULL, $4, $5, $6, NULL, $7, $8)", 
                   					[cards[i].id, cards[i].name, cards[i].desc, cards[i].dueComplete, cards[i].idBoard, 
@@ -355,6 +369,7 @@ var callback = function(request, response) {
               				var cards = JSON.parse(data);
               				var card_nothing = 1;
               				for(i=0; i < cards.length; i++){
+                        //console.log("card name:" + cards[i].name);
                 				if (cards[i].due == null){
                   					client.query("INSERT INTO Card VALUES ($1, $2, $3, NULL, $4, $5, $6, NULL, $7, $8)", 
                   					[cards[i].id, cards[i].name, cards[i].desc, cards[i].dueComplete, cards[i].idBoard, 
@@ -404,6 +419,7 @@ var callback = function(request, response) {
               				var cards = JSON.parse(data);
               				var card_nothing = 1;
               				for(i=0; i < cards.length; i++){
+                        //console.log("card name:" + cards[i].name);
                 				if (cards[i].due == null){
                   					client.query("INSERT INTO Card VALUES ($1, $2, $3, NULL, $4, $5, $6, NULL, $7, $8)", 
                   					[cards[i].id, cards[i].name, cards[i].desc, cards[i].dueComplete, cards[i].idBoard, 
@@ -435,6 +451,7 @@ var callback = function(request, response) {
               				var cards = JSON.parse(data);
               				var card_nothing = 1;
               				for(i=0; i < cards.length; i++){
+                        //console.log("card name:" + cards[i].name);
                 				if (cards[i].due == null){
                   					client.query("INSERT INTO Card VALUES ($1, $2, $3, NULL, $4, $5, $6, NULL, $7, $8)", 
                   					[cards[i].id, cards[i].name, cards[i].desc, cards[i].dueComplete, cards[i].idBoard, 
