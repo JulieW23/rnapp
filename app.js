@@ -37,8 +37,11 @@ const trelloAccessURL = "https://trello.com/1/OAuthGetAccessToken";
 const trelloAuthorizeURL = "https://trello.com/1/OAuthAuthorizeToken";
 const appName = "rnapp";
 
-const trelloKey = "5878cbde87e11ff40633bf73c28291e0";
-const trelloSecret = "c6fa27b49e16e4b339e9253082783e2d8713f80b31bf454bf52d7b1a83ad6a1d";
+// const trelloKey = "5878cbde87e11ff40633bf73c28291e0";
+// const trelloSecret = "c6fa27b49e16e4b339e9253082783e2d8713f80b31bf454bf52d7b1a83ad6a1d";
+
+const trelloKey = config.trelloKey;
+const trelloSecret = config.trelloSecret;
 
 // Trello redirects the user here after authentication
 const trelloLoginCallback = config.trelloLoginCallback + "/trello";
