@@ -265,6 +265,10 @@ var callback = function(request, response) {
             //getActionsHelper(twentyone_months_ago, eighteen_months_ago, boards[i].id, accessToken, accessTokenSecret);
             //getActionsHelper(two_years_ago, twentyone_months_ago, boards[i].id, accessToken, accessTokenSecret);
             // get actions for the last 3 months until present
+            console.log("https://api.trello.com/1/boards/" 
+            + boards[i].id + 
+            "/actions?filter=updateCard:idList,updateCard:closed,createCard&since=" 
+            + four_months_ago + "&key=" + trelloKey + "&token=" + accessToken);
             oauth.getProtectedResource("https://api.trello.com/1/boards/" 
             + boards[i].id + 
             "/actions?filter=updateCard:idList,updateCard:closed,createCard&since=" 
