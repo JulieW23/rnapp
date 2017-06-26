@@ -177,28 +177,31 @@ function generateFigure(idBoard, tabName){
 										time += (ms(list_actions[i][j+1].date) - ms(list_actions[i][j].date))/3600000;
 									}
 									// if the first action is in the time range but the second action is not
-									// else if (list_actions[i][j].date >= fromDate && list_actions[i][j].date <= toDate && list_actions[i][j+1].date > toDate){
-									// 	if (time == -1){
-									// 		time = 0;
-									// 	}
-									// 	time += (ms(toDate) - ms(list_actions[i][j].date))/3600000;
-									// 	// console.log('case2');
-									// }
+									else if (list_actions[i][j].date >= fromDate && list_actions[i][j].date <= toDate && list_actions[i][j+1].date > toDate){
+										if (time == -1){
+											time = 0;
+										}
+										// time += (ms(toDate) - ms(list_actions[i][j].date))/3600000;
+										time += 0;
+										// console.log('case2');
+									}
 									// if the first action is not in the time range but the second action is
-									// else if (list_actions[i][j].date < fromDate && list_actions[i][j+1].date >= fromDate && list_actions[i][j+1] <= toDate){
-									// 	if (time == -1){
-									// 		time = 0;
-									// 	}
-									// 	time += (ms(list_actions[i][j+1].date) - ms(fromDate))/3600000;
-									// 	// console.log('case3');
-									// }
-									// else if (list_actions[i][j].date < fromDate && list_actions[i][j+1].date > toDate){
-									// 	// console.log('case4');
-									// 	if (time == -1){
-									// 		time = 0;
-									// 	}
-									// 	time = (ms(toDate) - ms(fromDate))/3600000;
-									// }
+									else if (list_actions[i][j].date < fromDate && list_actions[i][j+1].date >= fromDate && list_actions[i][j+1] <= toDate){
+										if (time == -1){
+											time = 0;
+										}
+										// time += (ms(list_actions[i][j+1].date) - ms(fromDate))/3600000;
+										time += 0;
+										// console.log('case3');
+									}
+									else if (list_actions[i][j].date < fromDate && list_actions[i][j+1].date > toDate){
+										// console.log('case4');
+										if (time == -1){
+											time = 0;
+										}
+										// time = (ms(toDate) - ms(fromDate))/3600000;
+										time += 0;
+									}
 									// actions within the time range for the same cards
 									// should be processed in pairs
 									j++;
@@ -224,16 +227,18 @@ function generateFigure(idBoard, tabName){
 								else {
 									// if the last action for the card is in the time range
 									// *** assuming this action is the card entering the list
-									// if (list_actions[i][j].date <= toDate && list_actions[i][j].date >= fromDate){
-									// 	// console.log('last action for this card');
-									// 	time += (ms(toDate) - ms(list_actions[i][j].date))/3600000;
-									// }
+									if (list_actions[i][j].date <= toDate && list_actions[i][j].date >= fromDate){
+										// console.log('last action for this card');
+										// time += (ms(toDate) - ms(list_actions[i][j].date))/3600000;
+										time += 0;
+									}
 									// if the last action for this card is before the time range
 									// it should be the card entering the list, so the time = the time range
-									// if (list_actions[i][j].date < fromDate){
-									// 	// console.log('last action is before time range');
-									// 	time += (ms(toDate) - ms(fromDate))/3600000;
-									// }
+									if (list_actions[i][j].date < fromDate){
+										// console.log('last action is before time range');
+										// time += (ms(toDate) - ms(fromDate))/3600000;
+										time += 0;
+									}
 									tTime[k] = time;
 									idCard[k] = current_idCard;
 									time = -1;
@@ -351,6 +356,29 @@ function generateFigure(idBoard, tabName){
     									}
     								}
     							}
+    							// ISSUE: fix the x axis 
+								
+								// get rid of all empty columns anywhere in the chart
+								// var newData = [];
+								// var newCategories = [];
+								// for (j = 0; j < distribution_data[i].length; j++){
+								// 	// console.log(distribution_data[i]);
+								// 	if (distribution_data[i][j].y != 0){
+								// 		// console.log(distribution_data[i][j].y);
+								// 		//console.log(categories[j]);
+								// 		newData.push(distribution_data[i][j]);
+								// 		newCategories.push(categories[j]);
+								// 	}
+								// }
+
+								// get rid of all empty columns only at the end of the chart
+								var j=distribution_data[i].length -1;
+								while (j >= 0 && distribution_data[i][j].y == 0){
+									// console.log(distribution_data[i][j]);
+									// console.log(categories[j]);
+									j--;
+								}
+
     							$('#distribution-graph').append("<div id='distribution-graph" + [i] 
     								+ "'></div>");
     							Highcharts.chart('distribution-graph' + [i], {
@@ -364,7 +392,7 @@ function generateFigure(idBoard, tabName){
        									title: {
        										text: 'Number of days spent in this list'
         								},
-           								categories: categories
+           								categories: categories.slice(0, j+1)
         							},
         							yAxis: {
            								title: {
@@ -399,7 +427,7 @@ function generateFigure(idBoard, tabName){
         							series: [{
         								showInLegend: false,
             							name: ' ',
-            							data: distribution_data[i]
+            							data: distribution_data[i].slice(0, j+1)
         							}]
     							});
     							// CALCULATE AVERAGE
@@ -413,7 +441,13 @@ function generateFigure(idBoard, tabName){
     							}
     							var average;
     							average = Math.round((data_array.reduce(add, 0) / data_array.length) * 100) / 100;
-    							$('#distribution-graph' + [i]).append('<h4 style="text-align: center;">Average: ' + average + ' days </h4>');
+    							if (!(average >= 0)){
+    								console.log(average);
+    								$('#distribution-graph' + [i]).append('<h4 style="text-align: center;">Average: no data in time range</h4>');
+    							}
+    							else{
+    								$('#distribution-graph' + [i]).append('<h4 style="text-align: center;">Average: ' + average + ' days </h4>');
+    							}
     							
     							// CALCULATE STANDARD DEVIATION
     							var squared_difference = [];
@@ -421,7 +455,13 @@ function generateFigure(idBoard, tabName){
     								squared_difference.push((data_array[j] - average) * (data_array[j] - average));
     							}
     							var standard_deviation = Math.round((Math.sqrt(squared_difference.reduce(add, 0) / squared_difference.length) * 100)) / 100;
-    							$('#distribution-graph' + [i]).append('<h4 style="text-align: center;">Standard Deviation: ' + standard_deviation + ' days</h4><br><br>');
+    							if (!(standard_deviation >= 0)){
+    								$('#distribution-graph' + [i]).append('<h4 style="text-align: center;">Standard Deviation: no data in time range</h4><br><br>');
+    							}
+    							else{
+    								$('#distribution-graph' + [i]).append('<h4 style="text-align: center;">Standard Deviation: ' + standard_deviation + ' days</h4><br><br>');
+    							}
+    							
     						}
     						// console.log(distribution_data);
     						// console.log(card_id_and_name);
