@@ -314,9 +314,9 @@ var callback = function(request, response) {
               				}
             			});
             			// get unarchived cards for each list
-                  getUnarchivedCardsHelper(two_years_ago, one_year_ago, lists[i].id, accessToken, accessTokenSecret);
+                  // getUnarchivedCardsHelper(two_years_ago, one_year_ago, lists[i].id, accessToken, accessTokenSecret);
             			oauth.getProtectedResource("https://api.trello.com/1/lists/" 
-            			+ lists[i].id + "/cards?since=" + one_year_ago, "GET", 
+            			+ lists[i].id + "/cards?since=" + two_years_ago, "GET", 
             			accessToken, accessTokenSecret, function(error, data, response){
               				// console.log('GET UNARCHIVED CARDS');
               				var cards = JSON.parse(data);
@@ -345,9 +345,9 @@ var callback = function(request, response) {
               				}
             			});
             			// get archived cards
-                  getArchivedCardsHelper(two_years_ago, one_year_ago, lists[i].id, accessToken, accessTokenSecret);
+                  // getArchivedCardsHelper(two_years_ago, one_year_ago, lists[i].id, accessToken, accessTokenSecret);
             			oauth.getProtectedResource("https://api.trello.com/1/lists/" 
-            			+ lists[i].id + "/cards?filter=closed&since=" + one_year_ago, 
+            			+ lists[i].id + "/cards?filter=closed&since=" + two_years_ago, 
             			"GET", accessToken, accessTokenSecret, 
             			function(error, data, response){
               				// console.log('GET ARCHIVED CARDS');
@@ -396,9 +396,9 @@ var callback = function(request, response) {
               				}
             			});
             			// get unarchived cards for each list
-                  getUnarchivedCardsHelper(two_years_ago, one_year_ago, lists[i].id, accessToken, accessTokenSecret);
+                  //getUnarchivedCardsHelper(two_years_ago, one_year_ago, lists[i].id, accessToken, accessTokenSecret);
             			oauth.getProtectedResource("https://api.trello.com/1/lists/" 
-            			+ lists[i].id + "/cards?since=" + one_year_ago, "GET", accessToken, accessTokenSecret, 
+            			+ lists[i].id + "/cards?since=" + two_years_ago, "GET", accessToken, accessTokenSecret, 
             			function(error, data, response){
               				// console.log('GET UNARCHIVED CARDS');
               				var cards = JSON.parse(data);
@@ -427,9 +427,9 @@ var callback = function(request, response) {
               				}
             			});
             			// get archived cards
-                  getArchivedCardsHelper(two_years_ago, one_year_ago, lists[i].id, accessToken, accessTokenSecret);
+                  //getArchivedCardsHelper(two_years_ago, one_year_ago, lists[i].id, accessToken, accessTokenSecret);
             			oauth.getProtectedResource("https://api.trello.com/1/lists/" 
-            			+ lists[i].id + "/cards?filter=closed&since=" + one_year_ago, "GET", 
+            			+ lists[i].id + "/cards?filter=closed&since=" + two_years_ago, "GET", 
             			accessToken, accessTokenSecret, function(error, data, response){
               				// console.log('GET ARCHIVED CARDS');
               				var cards = JSON.parse(data);
