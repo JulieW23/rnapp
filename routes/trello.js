@@ -5,7 +5,6 @@ const path = require('path');
 const app = require('../app')
 var config = require("../config.js");
 const connectionString = config.databaseURL;
-//const connectionString = process.env.DATABASE_URL || 'postgres://postgres:Pinkbird222@localhost:5432/rapidnovordb';
 
 /* GET users listing. */
 // router.get('/', function(req, res, next) {
@@ -197,36 +196,13 @@ router.get('/actions/:idCard', (req, res, next) => {
     });
 });
 
-/* GET actions by list since specific date */
-// router.get('/actions_by_list/:listid/:date', (req, res, next) => {
-//     const listid = req.params.listid;
-//     const date = req.params.date;
-//     const qs = "SELECT * FROM Action WHERE (createdInListId='" + listid + "' or listBeforeId='" + listid + "' or listAfterId='" + listid + "' or closedInListId='" + listid + "') and date>'" + date + "' order  by idcard, date";
-//     getHelper(req, res, next, qs);
-// });
-
-/* GET actions by list in specific date range */
-// router.get('/actions_by_list/:listid/:fromDate/:toDate', (req, res, next) => {
-//     const listid = req.params.listid;
-//     const fromDate = req.params.fromDate;
-//     const toDate = req.params.toDate;
-//     const qs = "SELECT * FROM Action WHERE (createdInListId='" + listid + "' or listBeforeId='" + listid + "' or listAfterId='" + listid + "' or closedInListId='" + listid + "') and (date>'" + fromDate + "' and date<'" + toDate + "') order by idcard, date";
-//     getHelper(req, res, next, qs);
-// });
-
 /* GET actions by list */
 router.get('/actions_by_list/:listid', (req, res, next) => {
     const listid = req.params.listid;
     const qs = "SELECT * FROM Action WHERE createdInListId='" + listid + "' or listBeforeId='" + listid + "' or listAfterId='" + listid + "' or closedInListId='" + listid + "' order by idcard, date";
+    //console.log(qs);
     getHelper(req, res, next, qs);
 });
-
-/* GET most recent action for a given card id */
-// router.get('/actions/most_recent/:idCard', (req, res, next) => {
-//     const idCard = req.params.idCard;
-//     const qs = "SELECT * FROM Action WHERE idCard='" + idCard + "' order by date desc limit 1";
-//     getHelper(req, res, next, qs);
-// });
 
 /* POST an action */
 router.post('/actions', (req, res, next) => {
@@ -240,7 +216,7 @@ router.post('/actions', (req, res, next) => {
         if(err){
             done();
             console.log(err);
-        return res.status(500).json({success: false, data: err});
+            return res.status(500).json({success: false, data: err});
         }
         const check_action = client.query("SELECT count(*) FROM Action WHERE id='" + data.id + "'");
         check_action.on('row', (row) => {

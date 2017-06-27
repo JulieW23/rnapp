@@ -17,8 +17,6 @@ var config = require("./config.js");
 
 const connectionString = config.databaseURL;
 const client = new pg.Client(connectionString);
-//const connectionString = process.env.DATABASE_URL || 'postgres://postgres:Pinkbird222@localhost:5432/rapidnovordb';
-
 
 // ***********************************
 var routes = require('./routes/index');
@@ -61,10 +59,11 @@ function addMonths(date, months){
 }
 
 function getActionsHelper(filter, boardID, accessToken, accessTokenSecret){
-  console.log("https://api.trello.com/1/boards/" + boardID + "/actions?filter=" + filter);
+  console.log("https://api.trello.com/1/boards/" + boardID + "/actions?limit=1000&filter=" + filter);
+  console.log(accessToken);
   oauth.getProtectedResource("https://api.trello.com/1/boards/" 
   + boardID + 
-  "/actions?filter=" + filter, "GET", accessToken, accessTokenSecret, 
+  "/actions?limit=1000&filter=" + filter, "GET", accessToken, accessTokenSecret, 
   function(error, data, response){
     //console.log('actions since ' + since + 'until ' + before);
     // console.log('GET ACTIONS');
@@ -94,6 +93,7 @@ function getActionsHelper(filter, boardID, accessToken, accessTokenSecret){
           });
         }
         else {
+          console.log('card moved: "' + actions[i].data.card.name + '" from: "' + actions[i].data.listBefore.name + '" to: "' + actions[i].data.listAfter.name + '"');
           client.query("INSERT INTO Action VALUES ($1, $2, $3, $4, NULL, $5, $6, NULL, NULL, $7, $8, NULL, NULL)", 
           [actions[i].id, actions[i].data.card.id, actions[i].date, actions[i].type, 
           actions[i].data.listBefore.name, actions[i].data.listAfter.name, actions[i].data.listBefore.id, 
@@ -195,27 +195,27 @@ var callback = function(request, response) {
   	// const client = new pg.Client(connectionString);
   	// get current time
   	var present = new Date();
-    console.log('PRESENT DATE: ' + present);
+    //console.log('PRESENT DATE: ' + present);
     var two_years_ago = addMonths(new Date(), -24).toISOString();
-    console.log('2 years ago: ' + two_years_ago);
+    //console.log('2 years ago: ' + two_years_ago);
     //var twentyone_months_ago = addMonths(present, -21).toISOString();
     var twenty_months_ago = addMonths(new Date(), -20).toISOString();
-    console.log('twenty months ago: ' + twenty_months_ago);
+    //console.log('twenty months ago: ' + twenty_months_ago);
     // var eighteen_months_ago = addMonths(present, -18).toISOString();
     var sixteen_months_ago = addMonths(new Date(), -16).toISOString();
-    console.log('sixteen months ago: ' + sixteen_months_ago);
+    //console.log('sixteen months ago: ' + sixteen_months_ago);
     //var fifteen_months_ago = addMonths(present, -15).toISOString();
     var one_year_ago = addMonths(new Date(), -12).toISOString();
-    console.log('one year ago: ' + one_year_ago);
+    //console.log('one year ago: ' + one_year_ago);
     //var nine_months_ago = addMonths(present, -9).toISOString();
     var eight_months_ago = addMonths(new Date(), -8).toISOString();
-    console.log('eight months ago: ' + eight_months_ago);
+    //console.log('eight months ago: ' + eight_months_ago);
   	var six_months_ago = addMonths(new Date(), -6).toISOString();
-    console.log('six_months_ago: ' + six_months_ago);
+    //console.log('six_months_ago: ' + six_months_ago);
     var four_months_ago = addMonths(new Date(), -4).toISOString();
-    console.log('four months ago: ' + four_months_ago);
+    //console.log('four months ago: ' + four_months_ago);
     var one_month_ago = addMonths(new Date(), -1).toISOString();
-    console.log('one month ago: ' + one_month_ago);
+    //console.log('one month ago: ' + one_month_ago);
     //var three_months_ago = addMonths(present, -3).toISOString();
 
   	callback_check = 2;
@@ -258,19 +258,19 @@ var callback = function(request, response) {
       			client.query("INSERT INTO Board VALUES ($1, $2, $3)", 
       			[boards[i].id, boards[i].name, boards[i].shortUrl], function(err, result){
       				if (err){
-            			// console.log("error: " + err);
+            		// console.log("error: " + err);
       					board_nothing=1;
       				}
       			});
         		// get actions for the last 2 years
-            //getActionsHelper(one_month_ago, present.toISOString(), boards[i].id, accessToken, accessTokenSecret);
+            // getActionsHelper(one_month_ago, present.toISOString(), boards[i].id, accessToken, accessTokenSecret);
             // getActionsHelper(eight_months_ago, four_months_ago, boards[i].id, accessToken, accessTokenSecret);
             // getActionsHelper(one_year_ago, eight_months_ago, boards[i].id, accessToken, accessTokenSecret);
             // getActionsHelper(sixteen_months_ago, one_year_ago, boards[i].id, accessToken, accessTokenSecret);
             // getActionsHelper(twenty_months_ago, sixteen_months_ago, boards[i].id, accessToken, accessTokenSecret);
             // getActionsHelper(two_years_ago, twenty_months_ago, boards[i].id, accessToken, accessTokenSecret);
-            //getActionsHelper(twentyone_months_ago, eighteen_months_ago, boards[i].id, accessToken, accessTokenSecret);
-            //getActionsHelper(two_years_ago, twentyone_months_ago, boards[i].id, accessToken, accessTokenSecret);
+            // getActionsHelper(twentyone_months_ago, eighteen_months_ago, boards[i].id, accessToken, accessTokenSecret);
+            // getActionsHelper(two_years_ago, twentyone_months_ago, boards[i].id, accessToken, accessTokenSecret);
             // get actions for the last 3 months until present
             
             // console.log("https://api.trello.com/1/boards/" 
