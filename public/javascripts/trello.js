@@ -3,6 +3,15 @@ function reload(){
 }
 
 
+function wait(ms){
+   var start = new Date().getTime();
+   var end = start;
+   while(end < start + ms) {
+     end = new Date().getTime();
+  }
+}
+
+
 // Limits date picker so user cannot select future dates
 $(function(){
     var dtToday = new Date();
@@ -22,7 +31,7 @@ $(function(){
 
 $(function(){
 	if($('.date_picker')[0].type != 'date'){
-		$('.date_picker').datepicker({dateFormat: "yy-mm-dd"});
+		$('.date_picker').datepicker({dateFormat: "yy-mm-dd", maxDate: new Date()});
 	}
 });
 
@@ -104,378 +113,312 @@ function generateFigure(idBoard, tabName){
 	var list_actions;
 	// number of lists
 	var length;
+	// all cards
+	var cards;
 	// the distribution table as a 2d array
 	var table_cells = [['idCard', 'shorturl', 'Card']];
 	// array that stores card id + name + shorturl so that they can be matched (for distribution charts)
 	// [card.id, card.name, card.shorturl, card.idlist]
 	var card_id_and_name = [];
-	// get lists for this board
-	$.get('/trello/lists/' + idBoard, function(data){
-		list_names = new Array(data.length);
-		list_actions = new Array(data.length);
-		length = data.length;
-		// get cards for this board
-		$.get('/trello/cards/' + idBoard, function(carddata){
-			$.each(carddata, function(index, card){
-				// for table_cells, for distribution table
-				var push = [card.id, card.shorturl, card.name];
-				// for distribution graphs
-				card_id_and_name.push([card.id, card.name, card.shorturl, card.idlist]);
-				for (i=0; i < length; i++){
+	// get cards for this board
+	$.get('/trello/cards/' + idBoard, function(carddata){
+		cards = new Array(carddata.length);
+		$.each(carddata, function(index, card){
+			cards[index] = card;
+		});
+	}).done(function(){
+		// get lists for this board and store it all in variables defined above
+		$.get('/trello/lists/' + idBoard, function(data){
+			list_names = new Array(data.length);
+			list_actions = new Array(data.length);
+			length = data.length;
+			$.each(data, function(index, list){
+				list_names[index] = list.name;
+				table_cells[0].push(list.name);
+				list_id_and_name.push([list.id, list.name]);
+			});
+		}).done(function(){ // after storing data for all lists
+			// tidy up table
+			// for table_cells, for distribution table
+			for (i = 0; i < cards.length; i++){
+				//console.log(cards[i]);
+				var push = [cards[i].id, cards[i].shorturl, cards[i].name];
+				card_id_and_name.push([cards[i].id, cards[i].name, cards[i].shorturl, cards[i].idlist]);
+				for (j = 0; j < length; j++){
 					push.push('0');
 				}
 				table_cells.push(push);
-			});
-		}).done(function(){
-			//for each list
-			$.each(data, function(index, list) {
-				// store list name in it's own list
-				list_names[index] = list.name;
-				// append list name to table cell
-				table_cells[0].push(list.name);
-				list_id_and_name.push([list.id, list.name]);
-				// get actions for this list
-				$.get('/trello/actions_by_list/' + list.id, function(data1){
-					list_actions[index] = new Array(data1.length);
+			}
+			// for each list
+			async.eachSeries(list_id_and_name, function(list, done){
+				// get the actions for the list and store them in list_actions
+				$.get('/trello/actions_by_list/' + list[0], function(data1){
+					var index1 = list_id_and_name.indexOf(list);
+					list_actions[index1] = new Array(data1.length);
 					$.each(data1, function(index2, action){
-						list_actions[index][index2] = action;
+						list_actions[index1][index2] = action;
 					});
-				}).done(function(){
-					// *** data processing to find time each card spends in each list ***
-					if([index] == length-1){
-						// list graph data
-						var display_time = new Array(length);
-						// distribution graph data
-						var distribution_data = new Array(length);
-						
-						// for every list
-						for (i = 0; i < list_actions.length; i++){
-							// time each card spent in this list
-							var tTime = [];
-							// id of card (same order as tTime)
-							var idCard = [];
-							var k = 0;
-							// Initial time is negative (=-1) to ensure that cards that do not 
-							// exist within the time range will not be counted in charts/tables.
-							// When the processed data from this section is being prepared for 
-							// displaying, any entry where the time is a negative value
-							// will be ignored
-							var time = -1;
-							if (list_actions[i].length > 0){
-								var current_idCard = list_actions[i][0].idcard;
+					done();
+				});
+			}, function(err) {
+				if (err) {
+					throw err;
+				}
+				console.log(table_cells);
+				// ALL DATA IS STORED AND READY TO BE USED
+				// list graph data
+				var display_time = new Array(length);
+				// distribution graph data
+				var distribution_data = new Array(length);
+				// for every list
+				for (i = 0; i < list_actions.length; i++){
+					// time each card spent in this list
+					var tTime = [];
+					// id of card (same order as tTime)
+					var idCard = [];
+					var k = 0;
+					// Initial time is negative (=-1) to ensure that cards that do not 
+					// exist within the time range will not be counted in charts/tables.
+					// When the processed data from this section is being prepared for 
+					// displaying, any entry where the time is a negative value
+					// will be ignored
+					var time = -1;
+					if (list_actions[i].length > 0){
+						var current_idCard = list_actions[i][0].idcard;
+					}
+					// for every action
+					for (j = 0; j < list_actions[i].length; j++){
+						// if this and next action are for the same card
+						if (list_actions[i][j+1] && list_actions[i][j].idcard == list_actions[i][j+1].idcard){
+							// if both actions are in the time range
+							if (list_actions[i][j].date >= fromDate && list_actions[i][j+1].date <= toDate){
+								if(time == -1){
+									time = 0;
+								}
+								time += (ms(list_actions[i][j+1].date) - ms(list_actions[i][j].date))/3600000;
 							}
-							console.log(list_actions[i]);
-							// for every action
-							for (j = 0; j < list_actions[i].length; j++){
-								console.log(list_actions[i][j]);
-								// if this and next action are for the same card
-								if (list_actions[i][j+1] && list_actions[i][j].idcard == list_actions[i][j+1].idcard){
-									// if both actions are in the time range
-									if (list_actions[i][j].date >= fromDate && list_actions[i][j+1].date <= toDate){
-										// console.log('case1');
-										if (time == -1){
-											time = 0;
-										}
-										time += (ms(list_actions[i][j+1].date) - ms(list_actions[i][j].date))/3600000;
-										console.log(time);
-									}
-									// if the first action is in the time range but the second action is not
-									else if (list_actions[i][j].date >= fromDate && list_actions[i][j].date <= toDate && list_actions[i][j+1].date > toDate){
-										// if (time == -1){
-										// 	time = 0;
-										// }
-										// time += (ms(toDate) - ms(list_actions[i][j].date))/3600000;
-										time += 0;
-										// console.log('case2');
-									}
-									// if the first action is not in the time range but the second action is
-									else if (list_actions[i][j].date < fromDate && list_actions[i][j+1].date >= fromDate && list_actions[i][j+1] <= toDate){
-										// if (time == -1){
-										// 	time = 0;
-										// }
-										// time += (ms(list_actions[i][j+1].date) - ms(fromDate))/3600000;
-										time += 0;
-										// console.log('case3');
-									}
-									else if (list_actions[i][j].date < fromDate && list_actions[i][j+1].date > toDate){
-										// console.log('case4');
-										// if (time == -1){
-										// 	time = 0;
-										// }
-										// time = (ms(toDate) - ms(fromDate))/3600000;
-										time += 0;
-									}
-									// actions within the time range for the same cards
-									// should be processed in pairs
-									j++;
-									// if the next action is for a different card
-									if (list_actions[i][j+1] && list_actions[i][j].idcard != list_actions[i][j+1].idcard){
-										// console.log('different card');
-										tTime[k] = time;
-										idCard[k] = current_idCard;
-										current_idCard = list_actions[i][j+1].idcard;
-										time = -1;
-										k++;
-									}
-									// if there are no more actions
-									else if (!list_actions[i][j+1]){
-										// console.log('no more actions');
-										tTime[k] = time;
-										idCard[k] = current_idCard;
-										time = -1;
-										k++;
-									}
-								}
-								// if there is only one action left for a card
-								else {
-									// if the last action for the card is in the time range
-									// *** assuming this action is the card entering the list
-									if (list_actions[i][j].date <= toDate && list_actions[i][j].date >= fromDate){
-										// console.log('last action for this card');
-										// time += (ms(toDate) - ms(list_actions[i][j].date))/3600000;
-										time += 0;
-									}
-									// if the last action for this card is before the time range
-									// it should be the card entering the list, so the time = the time range
-									if (list_actions[i][j].date < fromDate){
-										// console.log('last action is before time range');
-										// time += (ms(toDate) - ms(fromDate))/3600000;
-										time += 0;
-									}
-									tTime[k] = time;
-									idCard[k] = current_idCard;
-									time = -1;
-									k++;
-									// if there are still actions for other cards
-									if (list_actions[i][j+1]){
-										current_idCard = list_actions[i][j+1].idcard;
-									}
-								}
+							j++;
+							// if the next actino is for a different card
+							if (list_actions[i][j+1] && list_actions[i][j].idcard != list_actions[i][j+1].idcard){
+								tTime[k] = time;
+								idCard[k] = current_idCard;
+								current_idCard = list_actions[i][j+1].idcard;
+								time = -1;
+								k++;
 							}
-
-							// *** preparing the processed data to be displayed ***
-							// console.log(tTime);
-							// console.log(idCard);
-							// generate x axis categories for distribution graphs
-							var categories = [];
-							var zeros = [];
-							var list_data = [];
-							for (z = 0; z <= num_days; z++){
-								categories.push(z);
-								zeros.push(0);
-								list_data.push({y: 0, cards: []});
+							// if there are no more actions
+							else if (!list_actions[i][j+1]){
+								// console.log('no more actions');
+								tTime[k] = time;
+								idCard[k] = current_idCard;
+								time = -1;
+								k++;
 							}
-
-							distribution_data[i] = list_data;
-
-							// store data for table
-							// for every entry in tTime/for every idcard
-							console.log(list_names[i] + ": " + tTime);
-							for (m = 0; m < tTime.length; m++){
-								// data for distribution chart
-								if (tTime[m] >= 0){
-									var hours_to_days = Math.round(tTime[m]/24);
-									distribution_data[i][hours_to_days].y ++;
-									distribution_data[i][hours_to_days].cards.push(idCard[m]);
-								}
-								// change -1 to 0 for table + list chart
-								else if (tTime[m] < 0){
-									tTime[m] = 0;
-								}
-								// for every row of table
-								for(n = 1; n < table_cells.length; n++){
-									if (idCard[m] == table_cells[n][0]){
-										table_cells[n][i+3] = Math.round(tTime[m] * 100) / 100;
-									}
-								}
-							}
-							// store data for list chart
-							display_time[i] = tTime.reduce(add, 0) / tTime.length;	
 						}
-						// *** displaying the required chart ***
-						// console.log(display_time);
-						// console.log(table_cells);
-						// display list chart
-						if (tabName == 'list-graph-tab'){
-							var listChart = Highcharts.chart('list-graph', {
-        						chart: {
-            						type: 'column'
-        						},
-        						title: {
-           							text: 'Average time that cards are in each list'
-        						},
-       							xAxis: {
-       								title: {
-       									text: 'List Name'
-        							},
-           							categories: list_names
-        						},
-        						yAxis: {
-           							title: {
-           								text: 'Average number of hours'
-       								}
-       							},
-        						series: [{
-        							showInLegend: false,
-        							name: 'Average # hours',
-            						data: display_time
-        						}]
-    						});	
-						}
-						// display table
-						else if (tabName == 'distribution-table'){
-							$('#table').empty();
-							var result = "<table>";
-							for (x = 0; x < table_cells.length; x++){
-								result += "<tr>";
-								for (y = 2; y < table_cells[x].length; y++){
-									if(y==2 && x>0){
-										result += "<td style='border: 1px solid black'><a href='" 
-										+ table_cells[x][1] + "'>" 
-										+ table_cells[x][y] + "</a></td>";
-									}
-									else{
-										result += "<td style='border: 1px solid black'>" 
-										+ table_cells[x][y] + "</td>";
-									}
-								}
-								result += "</tr>";
+						// if there is only one action left for a card
+						else {
+							tTime[k] = time;
+							idCard[k] = current_idCard;
+							time = -1;
+							k++;
+							// if there are still actions for other cards
+							if (list_actions[i][j+1]){
+								current_idCard = list_actions[i][j+1].idcard;
 							}
-							result += "</table>";
-							$('#table').append(result);
 						}
-						// display distribution graph
-						else if (tabName == 'distribution-graph-tab'){
-    						$('#distribution-graph').empty();
-    						for (i = 0; i < list_names.length; i++){
-    							// go through distribution_data and replace card ids with card names
-    							for (j = 0; j < distribution_data[i].length; j++){
-    								for (k = 0; k < distribution_data[i][j].cards.length; k++){
-    									for (n = 0; n < card_id_and_name.length; n++){
-    										if(distribution_data[i][j].cards[k] == card_id_and_name[n][0]){
-    											distribution_data[i][j].cards[k] = "<br><a href='" 
-    											+ card_id_and_name[n][2] + "'>" 
-    											+ card_id_and_name[n][1] + "</a>";
-    										}
-    									}
-    								}
-    							}
-    							// ISSUE: fix the x axis 
-								
-								// get rid of all empty columns anywhere in the chart
-								// var newData = [];
-								// var newCategories = [];
-								// for (j = 0; j < distribution_data[i].length; j++){
-								// 	// console.log(distribution_data[i]);
-								// 	if (distribution_data[i][j].y != 0){
-								// 		// console.log(distribution_data[i][j].y);
-								// 		//console.log(categories[j]);
-								// 		newData.push(distribution_data[i][j]);
-								// 		newCategories.push(categories[j]);
-								// 	}
-								// }
+					} // all data has been processed for this list
+					// *** next step: prepare the data to be displayed ***
+					// generate x axis categories for distribution graphs
+					var categories = [];
+					var zeros = [];
+					var list_data = [];
+					for (z = 0; z <= num_days; z++){
+						categories.push(z);
+						zeros.push(0);
+						list_data.push({y: 0, cards: []});
+					}
 
-								// get rid of all empty columns only at the end of the chart
-								var j=distribution_data[i].length -1;
-								while (j >= 0 && distribution_data[i][j].y == 0){
-									// console.log(distribution_data[i][j]);
-									// console.log(categories[j]);
-									j--;
-								}
-								console.log(distribution_data[i]);
+					distribution_data[i] = list_data;
 
-    							$('#distribution-graph').append("<div id='distribution-graph" + [i] 
-    								+ "'></div>");
-    							Highcharts.chart('distribution-graph' + [i], {
-        							chart: {
-            							type: 'column'
-        							},
-        							title: {
-           								text: 'Cards time distribution for list: ' + list_names[i]
-        							},
-       								xAxis: {
-       									title: {
-       										text: 'Number of days spent in this list'
-        								},
-           								categories: categories.slice(0, j+1)
-        							},
-        							yAxis: {
-           								title: {
-           									text: 'Number of cards'
-       									}
-       								},
-       								tooltip: {
-       									formatter: function(){
-       										return '<b>Number of cards: </b>' + this.point.y 
-       										+ '<br><b>Cards: </b>' + this.point.cards;
-       									}
-       								},
-       								plotOptions:{
-       									series: {
-       										cursor: 'pointer',
-       										point: {
-       											events: {
-       												click: function(e){
-       													hs.htmlExpand(null, {
-       														pageOrigin: {
-       															x: e.pageX || e.clientX,
-       															y: e.pageY || e.clientY
-       														},
-       														maincontentText: '<b>Number of cards: </b>' 
-       														+ this.y + '<br><b>Cards: </b>' + this.cards
-       													});
-       												}
-       											}
-       										},
-       									}
-       								},
-        							series: [{
-        								showInLegend: false,
-            							name: ' ',
-            							data: distribution_data[i].slice(0, j+1)
-        							}]
-    							});
-    							// CALCULATE AVERAGE
-    							var data_array = [];
-    							for (j = 0; j < distribution_data[i].length; j++){
-    								if (distribution_data[i][j].y > 0){
-    									for (x = 0; x < distribution_data[i][j].y; x++){
-    										data_array.push(j);
-    									}
-    								}
-    							}
-    							console.log(data_array);
-    							var average;
-    							average = Math.round((data_array.reduce(add, 0) / data_array.length) * 100) / 100;
-    							if (!(average >= 0)){
-    								console.log(average);
-    								$('#distribution-graph' + [i]).append('<h4 style="text-align: center;">Average: no data in time range</h4>');
-    							}
-    							else{
-    								$('#distribution-graph' + [i]).append('<h4 style="text-align: center;">Average: ' + average + ' days </h4>');
-    							}
-    							
-    							// CALCULATE STANDARD DEVIATION
-    							var squared_difference = [];
-    							for (j = 0; j < data_array.length; j++){
-    								squared_difference.push((data_array[j] - average) * (data_array[j] - average));
-    							}
-    							var standard_deviation = Math.round((Math.sqrt(squared_difference.reduce(add, 0) / squared_difference.length) * 100)) / 100;
-    							if (!(standard_deviation >= 0)){
-    								$('#distribution-graph' + [i]).append('<h4 style="text-align: center;">Standard Deviation: no data in time range</h4><br><br>');
-    							}
-    							else{
-    								$('#distribution-graph' + [i]).append('<h4 style="text-align: center;">Standard Deviation: ' + standard_deviation + ' days</h4><br><br>');
-    							}
-    							
-    						}
-    						// console.log(distribution_data);
-    						// console.log(card_id_and_name);
+					// store data for table
+					// for every entry in tTime/for every card
+					for (m = 0; m < tTime.length; m++){
+						// data for distribution chart
+						if (tTime[m] >= 0){
+							var hours_to_days = Math.round(tTime[m]/24);
+							distribution_data[i][hours_to_days].y ++;
+							distribution_data[i][hours_to_days].cards.push(idCard[m]);
+						}
+						// change -1 to 0 for table + list chart
+						else if (tTime[m] < 0){
+							tTime[m] = 0;
+						}
+						// for every row of table
+						for (n = 1; n < table_cells.length; n++){
+							if (idCard[m] == table_cells[n][0]){
+								table_cells[n][i+3] = Math.round(tTime[m] * 100) / 100;
+							}
 						}
 					}
-				});
+					// store data for list chart
+					display_time[i] = tTime.reduce(add, 0) / tTime.length;
+				} // data is now ready to be displayed
+				// *** next step: displaying the required chart ***
+				// display list chart
+				if (tabName == 'list-graph-tab'){
+					var listChart = Highcharts.chart('list-graph', {
+        				chart: {
+            				type: 'column'
+        				},
+        				title: {
+           					text: 'Average time that cards are in each list'
+        				},
+       					xAxis: {
+       						title: {
+       							text: 'List Name'
+        					},
+           					categories: list_names
+        				},
+        				yAxis: {
+           					title: {
+           						text: 'Average number of hours'
+       						}
+       					},
+        				series: [{
+        					showInLegend: false,
+        					name: 'Average # hours',
+            				data: display_time
+        				}]
+    				});	
+				}
+				// display table
+				else if (tabName == 'distribution-table'){
+					$('#table').empty();
+					var result = "<table>";
+					for (x = 0; x < table_cells.length; x++){
+						result += "<tr>";
+						for (y = 2; y < table_cells[x].length; y++){
+							if(y==2 && x>0){
+								result += "<td style='border: 1px solid black'><a href='" 
+								+ table_cells[x][1] + "'>" 
+								+ table_cells[x][y] + "</a></td>";
+							}
+							else{
+								result += "<td style='border: 1px solid black'>" 
+								+ table_cells[x][y] + "</td>";
+							}
+						}
+						result += "</tr>";
+					}
+					result += "</table>";
+					$('#table').append(result);
+				}
+				// display distribution graph
+				else if (tabName == 'distribution-graph-tab'){
+					$('#distribution-graph').empty();
+					for (i = 0; i < list_names.length; i++){
+						// go through distribution_data and replace card ids with card names
+						for (j = 0; j < distribution_data[i].length; j++){
+    						for (k = 0; k < distribution_data[i][j].cards.length; k++){
+    							for (n = 0; n < card_id_and_name.length; n++){
+    								if(distribution_data[i][j].cards[k] == card_id_and_name[n][0]){
+    									distribution_data[i][j].cards[k] = "<br><a href='" 
+    									+ card_id_and_name[n][2] + "'>" 
+    									+ card_id_and_name[n][1] + "</a>";
+    								}
+    							}
+    						}
+    					}
+    					// get rid of all empty columns only at the end of the chart
+    					var j=distribution_data[i].length -1;
+						while (j >= 0 && distribution_data[i][j].y == 0){
+							j--;
+						}
+						$('#distribution-graph').append("<div id='distribution-graph" + [i] 
+    						+ "'></div>");
+						Highcharts.chart('distribution-graph' + [i], {
+        					chart: {
+            					type: 'column'
+        					},
+        					title: {
+           						text: 'Cards time distribution for list: ' + list_names[i]
+        					},
+       						xAxis: {
+       							title: {
+       								text: 'Number of days spent in this list'
+        						},
+           						categories: categories.slice(0, j+1)
+        					},
+        					yAxis: {
+           						title: {
+           							text: 'Number of cards'
+       							}
+       						},
+       						tooltip: {
+       							formatter: function(){
+       								return '<b>Number of cards: </b>' + this.point.y 
+       								+ '<br><b>Cards: </b>' + this.point.cards;
+       							}
+       						},
+       						plotOptions:{
+       							series: {
+       								cursor: 'pointer',
+       								point: {
+       									events: {
+       										click: function(e){
+       											hs.htmlExpand(null, {
+       												pageOrigin: {
+       													x: e.pageX || e.clientX,
+       													y: e.pageY || e.clientY
+       												},
+       												maincontentText: '<b>Number of cards: </b>' 
+       												+ this.y + '<br><b>Cards: </b>' + this.cards
+       											});
+       										}
+       									}
+       								},
+       							}
+       						},
+        					series: [{
+        						showInLegend: false,
+            					name: ' ',
+            					data: distribution_data[i].slice(0, j+1)
+        					}]
+    					});
+    					// CALCULATE AVERAGE
+    					var data_array = [];
+    					for (j = 0; j < distribution_data[i].length; j++){
+    						if (distribution_data[i][j].y > 0){
+    							for (x = 0; x < distribution_data[i][j].y; x++){
+    								data_array.push(j);
+    							}
+    						}
+    					}
+    					var average;
+    					average = Math.round((data_array.reduce(add, 0) / data_array.length) * 100) / 100;
+    					if (!(average >= 0)){
+    						$('#distribution-graph' + [i]).append('<h4 style="text-align: center;">Average: no data in time range</h4>');
+    					}
+    					else{
+    						$('#distribution-graph' + [i]).append('<h4 style="text-align: center;">Average: ' + average + ' days </h4>');
+    					}
+
+    					// CALCULATE STANDARD DEVIATION
+    					var squared_difference = [];
+    					for (j = 0; j < data_array.length; j++){
+    						squared_difference.push((data_array[j] - average) * (data_array[j] - average));
+    					}
+    					var standard_deviation = Math.round((Math.sqrt(squared_difference.reduce(add, 0) / squared_difference.length) * 100)) / 100;
+    					if (!(standard_deviation >= 0)){
+    						$('#distribution-graph' + [i]).append('<h4 style="text-align: center;">Standard Deviation: no data in time range</h4><br><br>');
+    					}
+    					else{
+    						$('#distribution-graph' + [i]).append('<h4 style="text-align: center;">Standard Deviation: ' + standard_deviation + ' days</h4><br><br>');
+    					}
+					}
+				}
 			});
-		});	
+		});
 	});
 }
 
