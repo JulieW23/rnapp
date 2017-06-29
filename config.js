@@ -1,6 +1,7 @@
 module.exports = {
 	// database link
-	databaseURL: 'postgres://postgres:Pinkbird222@localhost:5432/rapidnovordb',
+	//databaseURL: 'postgres://postgres:Pinkbird222@localhost:5432/rapidnovordb',
+	databaseURL: process.env.DATABASE_URL,
 	// trello login callback
 	trelloLoginCallback: "https://rnapp.herokuapp.com",
 
