@@ -1,6 +1,9 @@
 module.exports = {
+	// database link
 	databaseURL: 'postgres://postgres:Pinkbird222@localhost:5432/rapidnovordb',
+	// trello login callback
 	trelloLoginCallback: "http://localhost:3000",
+	
 	// replace the two fields below with your own application key and secret
 	// from this url:
 	// https://trello.com/app-key

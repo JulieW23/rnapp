@@ -44,6 +44,13 @@ router.get('/boards', (req, res, next) => {
     getHelper(req, res, next, qs);
 });
 
+/* GET all boards containing the given member */
+router.get('/boards/:idmember', (req, res, next) =>{
+    const idMember = req.params.idmember;
+    const qs = "SELECT * FROM Board WHERE memberships @> array ['" + idMember + "']::text[]";
+    getHelper(req, res, next, qs);
+});
+
 /* ================================================================
 // LISTS
 ================================================================ */ 

@@ -103,7 +103,6 @@ function generateFigure(idBoard, tabName){
 			toDate = document.getElementById("listToDate").value;
 		}
 	}
-	console.log(fromDate);
 	var num_days = (ms(toDate)-ms(fromDate))/86400000;
 	// lists id and name
 	var list_id_and_name = [];
@@ -356,7 +355,7 @@ function generateFigure(idBoard, tabName){
        						},
        						tooltip: {
        							formatter: function(){
-       								return '<b>Number of cards: </b>' + this.point.y 
+       								return '<b>Days: </b>' + this.x + '<br><b>Number of cards: </b>' + this.point.y 
        								+ '<br><b>Cards: </b>' + this.point.cards;
        							}
        						},
@@ -371,7 +370,7 @@ function generateFigure(idBoard, tabName){
        													x: e.pageX || e.clientX,
        													y: e.pageY || e.clientY
        												},
-       												maincontentText: '<b>Number of cards: </b>' 
+       												maincontentText: '<b>Days: </b>' + this.x + '<br><b>Number of cards: </b>' 
        												+ this.y + '<br><b>Cards: </b>' + this.cards
        											});
        										}

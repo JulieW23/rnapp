@@ -4,6 +4,7 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+// var session = require('express-session');
 
 var http = require('http');
 var OAuth = require('oauth').OAuth
@@ -21,8 +22,13 @@ const client = new pg.Client(connectionString);
 // ***********************************
 var routes = require('./routes/index');
 var trello = require('./routes/trello');
+var trellowebhooks = require('./routes/trellowebhooks');
 
 var app = express();
+
+// app.use(session({secret: 'rnsecret', resave: false}));
+
+// var sess;
 
 /*
 / =================================================================
@@ -69,12 +75,12 @@ function getActionsHelper(filter, boardID, accessToken, accessTokenSecret){
     var action_nothing = 1;
     for (i=0; i < actions.length; i++){
       if(actions[i].type == 'createCard'){
-        console.log('card created: "' + actions[i].data.card.name + '" in list: "' + actions[i].data.list.name + '" at time: ' + actions[i].date);
+        // console.log('card created: "' + actions[i].data.card.name + '" in list: "' + actions[i].data.list.name + '" at time: ' + actions[i].date);
         client.query("INSERT INTO Action VALUES ($1, $2, $3, $4, $5, NULL, NULL, NULL, $6, NULL, NULL, NULL, NULL)", 
         [actions[i].id, actions[i].data.card.id, actions[i].date, actions[i].type, actions[i].data.list.name, 
         actions[i].data.list.id], function(err, result){
           if(err){
-            console.log("error: " + err);
+            // console.log("error: " + err);
             action_nothing = 1;
           }
         });
@@ -85,19 +91,19 @@ function getActionsHelper(filter, boardID, accessToken, accessTokenSecret){
             [actions[i].id, actions[i].data.card.id, actions[i].date, actions[i].type, actions[i].data.list.name, 
             actions[i].data.list.id, actions[i].data.card.closed], function(err, result){
               if(err){
-                console.log("error: " + err);
+                //console.log("error: " + err);
                 action_nothing = 1;
               }
           });
         }
         else {
-          console.log('card moved: "' + actions[i].data.card.name + '" from: "' + actions[i].data.listBefore.name + '" to: "' + actions[i].data.listAfter.name + '"');
+          //console.log('card moved: "' + actions[i].data.card.name + '" from: "' + actions[i].data.listBefore.name + '" to: "' + actions[i].data.listAfter.name + '"');
           client.query("INSERT INTO Action VALUES ($1, $2, $3, $4, NULL, $5, $6, NULL, NULL, $7, $8, NULL, NULL)", 
           [actions[i].id, actions[i].data.card.id, actions[i].date, actions[i].type, 
           actions[i].data.listBefore.name, actions[i].data.listAfter.name, actions[i].data.listBefore.id, 
           actions[i].data.listAfter.id], function(err, result){
             if(err){
-              console.log("error: " + err);
+              //console.log("error: " + err);
               action_nothing = 1;
             }
           });
@@ -251,13 +257,24 @@ var callback = function(request, response) {
       		var boards = JSON.parse(data);
       		var board_nothing = 1;
       		for (i = 0; i < boards.length; i++) {
-      			client.query("INSERT INTO Board VALUES ($1, $2, $3)", 
-      			[boards[i].id, boards[i].name, boards[i].shortUrl], function(err, result){
+            // console.log(boards[i]);
+            var memberships = [];
+            for (j = 0; j < boards[i].memberships.length; j++){
+              memberships.push(boards[i].memberships[j].idMember);
+              // console.log(memberships);
+            }
+
+      			client.query("INSERT INTO Board VALUES ($1, $2, $3, $4)", 
+      			[boards[i].id, boards[i].name, boards[i].shortUrl, memberships], function(err, result){
       				if (err){
             		// console.log("error: " + err);
       					board_nothing=1;
       				}
       			});
+            // var xhr = new XMLHttpRequest();
+            // xhr.open('POST', "https://api.trello.com/1/webhooks?idModel="+ boards[i].id + "&callbackURL=" + trelloLoginCallback + "/trellowebhooks&key=" + trelloKey + "&token=" + accessToken, false);
+            // xhr.send();
+            // console.log('RESPONSE: ' + xhr.responseText);
         		// get actions for the last 2 years
             // getActionsHelper(one_month_ago, present.toISOString(), boards[i].id, accessToken, accessTokenSecret);
             // getActionsHelper(eight_months_ago, four_months_ago, boards[i].id, accessToken, accessTokenSecret);
@@ -476,6 +493,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ***********************************
 app.use('/', routes);
 app.use('/trello', trello);
+app.use('/trellowebhooks', trellowebhooks);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
