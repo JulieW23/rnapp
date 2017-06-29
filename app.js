@@ -271,10 +271,10 @@ var callback = function(request, response) {
       					board_nothing=1;
       				}
       			});
-            // var xhr = new XMLHttpRequest();
-            // xhr.open('POST', "https://api.trello.com/1/webhooks?idModel="+ boards[i].id + "&callbackURL=" + trelloLoginCallback + "/trellowebhooks&key=" + trelloKey + "&token=" + accessToken, false);
-            // xhr.send();
-            // console.log('RESPONSE: ' + xhr.responseText);
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', "https://api.trello.com/1/webhooks?idModel="+ boards[i].id + "&callbackURL=" + trelloLoginCallback + "/trellowebhooks&key=" + trelloKey + "&token=" + accessToken, false);
+            xhr.send();
+            console.log('RESPONSE: ' + xhr.responseText);
             
         		// get actions for the last 2 years
             // getActionsHelper(one_month_ago, present.toISOString(), boards[i].id, accessToken, accessTokenSecret);
