@@ -275,6 +275,7 @@ var callback = function(request, response) {
             // xhr.open('POST', "https://api.trello.com/1/webhooks?idModel="+ boards[i].id + "&callbackURL=" + trelloLoginCallback + "/trellowebhooks&key=" + trelloKey + "&token=" + accessToken, false);
             // xhr.send();
             // console.log('RESPONSE: ' + xhr.responseText);
+            
         		// get actions for the last 2 years
             // getActionsHelper(one_month_ago, present.toISOString(), boards[i].id, accessToken, accessTokenSecret);
             // getActionsHelper(eight_months_ago, four_months_ago, boards[i].id, accessToken, accessTokenSecret);
