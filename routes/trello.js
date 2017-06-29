@@ -1,10 +1,18 @@
 var express = require('express');
 var router = express.Router();
 const pg = require('pg');
+const {Client, Query} = require('pg');
 const path = require('path');
-const app = require('../app')
+const app = require('../app');
 var config = require("../config.js");
-const connectionString = config.databaseURL;
+//const connectionString = config.databaseURL;
+var pool = new pg.Pool({
+    database: 'rapidnovordb',
+    user: 'postgres',
+    password: 'Pinkbird222',
+    port: 5432
+});
+
 
 /* GET users listing. */
 // router.get('/', function(req, res, next) {
@@ -15,14 +23,14 @@ module.exports = router;
 /* GET helper function */
 function getHelper(req, res, next, queryString) {
     const results = [];
-    pg.connect(connectionString, (err, client, done) => {
+    pool.connect(function (err, client, done){
         if(err){
             done();
             console.log(err);
             return res.status(500).json({sucess: false, data: err});
         }
         // SQL Query > Select Data
-        const query = client.query(queryString);
+        const query = client.query(new Query(queryString));
         query.on('row', (row) => {
             results.push(row);
         });
@@ -31,7 +39,7 @@ function getHelper(req, res, next, queryString) {
             return res.json(results);
         });
     });
-}
+} 
 
 /* ================================================================
 // BOARDS
@@ -78,20 +86,20 @@ router.post('/lists', (req, res, next) => {
     const results = [];
     const data = {id: req.body.id, idBoard: req.body.idBoard, 
     name: req.body.name, closed: req.body.closed};
-    pg.connect(connectionString, (err, client, done) => {
+    pool.connect(function (err, client, done){
         if(err){
             done();
             console.log(err);
             return res.status(500).json({success: false, data: err});
         }
-        const check_list = client.query("SELECT count(*) FROM List WHERE id='" + data.id + "'");
+        const check_list = client.query(new Query("SELECT count(*) FROM List WHERE id='" + data.id + "'"));
         check_list.on('row', (row) => {
             if (row.count == 0){
           	     client.query('INSERT INTO List(id, idBoard, name, closed) values($1, $2, $3, $4)', 
       			[data.id, data.idBoard, data.name, data.closed]);
             }
         });
-        const query = client.query('SELECT * FROM List');
+        const query = client.query(new Query('SELECT * FROM List'));
         query.on('row', (row) => {
             results.push(row);
         });
@@ -145,13 +153,13 @@ router.post('/cards', (req, res, next) => {
     dueComplete: req.body.dueComplete, idBoard: req.body.idBoard, 
     idList: req.body.idList, idMembers: req.body.idMembers, 
     shortURL: req.body.shortURL, closed: req.body.closed};
-    pg.connect(connectionString, (err, client, done) => {
+    pool.connect(function (err, client, done){
         if(err){
             done();
             console.log(err);
             return res.status(500).json({success: false, data: err});
         }
-        const check_card = client.query("SELECT count(*) FROM Card WHERE id='" + data.id + "'");
+        const check_card = client.query(new Query("SELECT count(*) FROM Card WHERE id='" + data.id + "'"));
         check_card.on('row', (row) => {
             if (row.count == 0){
           	     client.query('INSERT INTO Card(id, name, description, due, \
@@ -162,7 +170,7 @@ router.post('/cards', (req, res, next) => {
       			data.shortURL, data.closed]);
             }
         });
-        const query = client.query('SELECT * FROM Card');
+        const query = client.query(new Query('SELECT * FROM Card'));
         query.on('row', (row) => {
             results.push(row);
         });
@@ -186,13 +194,13 @@ router.get('/actions', (req, res, next) => {
 router.get('/actions/:idCard', (req, res, next) => {
     const results = [];
     const idCard = req.params.idCard;
-    pg.connect(connectionString, (err, client, done) => {
+    pool.connect(function(err, client, done) {
         if (err) {
             done();
             console.log(err);
             return res.status(500).json({success: false, data: err});
         }
-        const query = client.query('SELECT * FROM Action WHERE idCard=($1)', [idCard]);
+        const query = client.query(new Query('SELECT * FROM Action WHERE idCard=($1)', [idCard]));
         query.on('row', (row) => {
             results.push(row);
         });
@@ -219,13 +227,13 @@ router.post('/actions', (req, res, next) => {
     listBefore: req.body.listBefore, listAfter: req.body.listAfter, closedInList: req.body.closedInList, 
     createdInListId: req.body.createdInListId, listBeforeId: req.body.listBeforeId, listAfterId: req.body.listAfterId, 
     closedInListId: req.body.closedInListId, closed: req.body.closed};
-    pg.connect(connectionString, (err, client, done) => {
+    pool.connect(function (err, client, done) {
         if(err){
             done();
             console.log(err);
             return res.status(500).json({success: false, data: err});
         }
-        const check_action = client.query("SELECT count(*) FROM Action WHERE id='" + data.id + "'");
+        const check_action = client.query(new Query("SELECT count(*) FROM Action WHERE id='" + data.id + "'"));
         check_action.on('row', (row) => {
             if (row.count == 0){
           	     client.query('INSERT INTO Action(id, idCard, date, type, createdInList, \
@@ -237,7 +245,7 @@ router.post('/actions', (req, res, next) => {
                 data.listBeforeId, data.listAfterId, data.closedInListId, data.closed]);
             }
         });
-        const query = client.query('SELECT * FROM Action');
+        const query = client.query(new Query('SELECT * FROM Action'));
         query.on('row', (row) => {
             results.push(row);
         });

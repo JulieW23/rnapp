@@ -12,19 +12,25 @@ var url = require('url');
 
 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 const pg = require('pg');
+const {Client, Query} = require('pg');
 
 var config = require("./config.js");
 
 
-const connectionString = config.databaseURL;
+//const connectionString = config.databaseURL;
+const connectionString = "postgres://" + config.databaseUser + ":" 
++ config.databasePassword + "@" + config.databaseHost + ":" 
++ config.databasePort + "/" + config.databaseName;
+
 const client = new pg.Client(connectionString);
 
 // ***********************************
 var routes = require('./routes/index');
 var trello = require('./routes/trello');
-var trellowebhooks = require('./routes/trellowebhooks');
 
 var app = express();
+
+var pool = new pg.Pool();
 
 // app.use(session({secret: 'rnsecret', resave: false}));
 
@@ -239,8 +245,8 @@ var callback = function(request, response) {
         	// accessTokenSecret: ${accessTokenSecret}`);
         	// console.log('GET USER');
         	var user = JSON.parse(data);
-        	const checkuser = client.query("SELECT count(*) FROM Member WHERE id=($1)", 
-        	[user.id]);
+        	const checkuser = client.query(new Query("SELECT count(*) FROM Member WHERE id=($1)", 
+        	[user.id]));
         	checkuser.on('row', (row) => {
           		if (row.count == 0){
               		client.query("INSERT INTO Member VALUES($1, $2)", 
@@ -271,11 +277,11 @@ var callback = function(request, response) {
       					board_nothing=1;
       				}
       			});
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', "https://api.trello.com/1/webhooks?idModel="+ boards[i].id + "&callbackURL=" + trelloLoginCallback + "/trellowebhooks&key=" + trelloKey + "&token=" + accessToken, false);
-            xhr.send();
-            console.log('RESPONSE: ' + xhr.responseText);
-            
+            // var xhr = new XMLHttpRequest();
+            // xhr.open('POST', "https://api.trello.com/1/webhooks?idModel="+ boards[i].id + "&callbackURL=" + trelloLoginCallback + "/trellowebhooks&key=" + trelloKey + "&token=" + accessToken, false);
+            // xhr.send();
+            // console.log('RESPONSE: ' + xhr.responseText);
+
         		// get actions for the last 2 years
             // getActionsHelper(one_month_ago, present.toISOString(), boards[i].id, accessToken, accessTokenSecret);
             // getActionsHelper(eight_months_ago, four_months_ago, boards[i].id, accessToken, accessTokenSecret);
@@ -494,7 +500,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ***********************************
 app.use('/', routes);
 app.use('/trello', trello);
-app.use('/trellowebhooks', trellowebhooks);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

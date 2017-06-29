@@ -1,9 +1,14 @@
 module.exports = {
 	// database link
 	//databaseURL: 'postgres://postgres:Pinkbird222@localhost:5432/rapidnovordb',
-	databaseURL: process.env.DATABASE_URL,
+	databaseName: 'rapidnovordb',
+	databaseUser: 'postgres',
+	databasePassword: 'Pinkbird222',
+	databasePort: 5432,
+	databaseHost: 'localhost',
 	// trello login callback
-	trelloLoginCallback: "https://rnapp.herokuapp.com",
+	//trelloLoginCallback: "https://rnapp.herokuapp.com",
+	trelloLoginCallback: "http://localhost:3000",
 
 	// replace the two fields below with your own application key and secret
 	// from this url:

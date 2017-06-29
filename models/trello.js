@@ -1,7 +1,10 @@
 const pg = require('pg');
+const {Client, Query} = require('pg');
 var config = require("../config.js");
-const connectionString = config.databaseURL;
-//const connectionString = process.env.DATABASE_URL || 'postgres://postgres:Pinkbird222@localhost:5432/rapidnovordb';
+//const connectionString = config.databaseURL;
+const connectionString = "postgres://" + config.databaseUser + ":" 
++ config.databasePassword + "@" + config.databaseHost + ":" 
++ config.databasePort + "/" + config.databaseName;
 
 const client = new pg.Client(connectionString);
 client.connect();
@@ -99,8 +102,8 @@ client.query(
 );
 
 // Webhook id
-const query = client.query(
+const query = client.query(new Query(
 	'CREATE TABLE Webhook(\
 	id varchar(25) PRIMARY KEY)'
-);
+));
 query.on('end', () => { client.end(); });
