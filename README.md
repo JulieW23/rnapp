@@ -8,11 +8,8 @@
 
 ## Setup
 * Create a database in PostgreSQL named 'rapidnovordb'. This can be done in the PostgreSQL shell with the command `create database rapidnovordb;` 
-* Edit the PostgreSQL and Trello login callback URLs in config.js:
 
-   * PostgreSQL
-   
-      Format: `postgres://[someuser]:[somepassword]@[somehost]:[someport]/rapidnovordb`
+* Edit config.js
    
    
 * In the root directory of the project, run commands
@@ -23,4 +20,4 @@
    
    `npm start` to start the server
    
-* You should be able to access the app at http://localhost:3000/
+   
