@@ -81,34 +81,6 @@ router.get('/lists/:idBoard', (req, res, next) => {
     getHelper(req, res, next, qs);
 });
 
-/* POST list */
-router.post('/lists', (req, res, next) => {
-    const results = [];
-    const data = {id: req.body.id, idBoard: req.body.idBoard, 
-    name: req.body.name, closed: req.body.closed};
-    pool.connect(function (err, client, done){
-        if(err){
-            done();
-            console.log(err);
-            return res.status(500).json({success: false, data: err});
-        }
-        const check_list = client.query(new Query("SELECT count(*) FROM List WHERE id='" + data.id + "'"));
-        check_list.on('row', (row) => {
-            if (row.count == 0){
-          	     client.query('INSERT INTO List(id, idBoard, name, closed) values($1, $2, $3, $4)', 
-      			[data.id, data.idBoard, data.name, data.closed]);
-            }
-        });
-        const query = client.query(new Query('SELECT * FROM List'));
-        query.on('row', (row) => {
-            results.push(row);
-        });
-        query.on('end', () => {
-            done();
-            return res.json(results);
-        });
-    });
-});
 
 /* ================================================================
 // CARDS
@@ -145,41 +117,6 @@ router.get('/cards/list/:idList', (req, res, next) => {
     getHelper(req, res, next, qs);
 });
 
-/* POST a card */
-router.post('/cards', (req, res, next) => {
-    const results = [];
-    const data = {id: req.body.id, name: req.body.name, 
-    description: req.body.description, due: req.body.due, 
-    dueComplete: req.body.dueComplete, idBoard: req.body.idBoard, 
-    idList: req.body.idList, idMembers: req.body.idMembers, 
-    shortURL: req.body.shortURL, closed: req.body.closed};
-    pool.connect(function (err, client, done){
-        if(err){
-            done();
-            console.log(err);
-            return res.status(500).json({success: false, data: err});
-        }
-        const check_card = client.query(new Query("SELECT count(*) FROM Card WHERE id='" + data.id + "'"));
-        check_card.on('row', (row) => {
-            if (row.count == 0){
-          	     client.query('INSERT INTO Card(id, name, description, due, \
-      			dueComplete, idBoard, idList, idMembers, shortURL, closed)\
-       			values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)', 
-      			[data.id, data.name, data.description, data.due, data.dueComplete, 
-      			data.idBoard, data.idList, data.idMembers, 
-      			data.shortURL, data.closed]);
-            }
-        });
-        const query = client.query(new Query('SELECT * FROM Card'));
-        query.on('row', (row) => {
-            results.push(row);
-        });
-        query.on('end', () => {
-            done();
-            return res.json(results);
-        });
-    });
-});
 
 /* ================================================================
 // ACTIONS
@@ -219,39 +156,15 @@ router.get('/actions_by_list/:listid', (req, res, next) => {
     getHelper(req, res, next, qs);
 });
 
-/* POST an action */
-router.post('/actions', (req, res, next) => {
-    const results = [];
-    const data = {id: req.body.id, idCard: req.body.idCard, date: req.body.date, 
-    type: req.body.type, createdInList: req.body.createdInList, 
-    listBefore: req.body.listBefore, listAfter: req.body.listAfter, closedInList: req.body.closedInList, 
-    createdInListId: req.body.createdInListId, listBeforeId: req.body.listBeforeId, listAfterId: req.body.listAfterId, 
-    closedInListId: req.body.closedInListId, closed: req.body.closed};
-    pool.connect(function (err, client, done) {
-        if(err){
-            done();
-            console.log(err);
-            return res.status(500).json({success: false, data: err});
-        }
-        const check_action = client.query(new Query("SELECT count(*) FROM Action WHERE id='" + data.id + "'"));
-        check_action.on('row', (row) => {
-            if (row.count == 0){
-          	     client.query('INSERT INTO Action(id, idCard, date, type, createdInList, \
-     			listBefore, listAfter, closedInList, createdInListId, listBeforeId, \
-                ListAfterId, closedInListId, closed)\
-       			values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)', 
-      			[data.id, data.idCard, data.date, data.type, data.createdInList, 
-      			data.listBefore, data.listAfter, data.closedInList, data.createdInListId, 
-                data.listBeforeId, data.listAfterId, data.closedInListId, data.closed]);
-            }
-        });
-        const query = client.query(new Query('SELECT * FROM Action'));
-        query.on('row', (row) => {
-            results.push(row);
-        });
-        query.on('end', () => {
-            done();
-            return res.json(results);
-        });
-    });
+
+/* ================================================================
+// MEMBERS
+================================================================ */ 
+
+/* GET member by token */
+router.get('/member/:token', (req, res, next) => {
+    const token = req.params.token;
+    const qs = "SELECT * FROM Member WHERE accesstoken='" + token + "'";
+    //console.log(qs);
+    getHelper(req, res, next, qs);
 });

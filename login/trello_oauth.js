@@ -9,9 +9,17 @@ var http = require('http');
 var async = require('async');
 
 var addMonths = function(date, months){
-	date.setMonth(date.getMonth() + months);
-	return date;
+  date.setMonth(date.getMonth() + months);
+  return date;
 }
+
+// function wait(ms){
+//    var start = new Date().getTime();
+//    var end = start;
+//    while(end < start + ms) {
+//      end = new Date().getTime();
+//   }
+// }
 
 var trelloRequestURL = "https://trello.com/1/OAuthGetRequestToken";
 var trelloAccessURL = "https://trello.com/1/OAuthGetAccessToken";
@@ -62,15 +70,10 @@ getActionsHelper = function(filter, boardID, accessToken, accessTokenSecret){
   oauth.getProtectedResource("https://api.trello.com/1/boards/" 
   + boardID + "/actions?limit=1000&filter=" + filter, "GET", accessToken, 
   accessTokenSecret, function(error, data, response){
-    //console.log('actions since ' + since + 'until ' + before);
-    // console.log('GET ACTIONS');
     var actions = JSON.parse(data);
     var action_nothing = 1;
     for (i=0; i < actions.length; i++){
       if(actions[i].type == 'createCard'){
-        // console.log('card created: "' + actions[i].data.card.name 
-        // + '" in list: "' + actions[i].data.list.name + '" at time: ' 
-        // + actions[i].date);
         client.query("INSERT INTO Action VALUES \
         ($1, $2, $3, $4, $5, NULL, NULL, NULL, $6, NULL, NULL, NULL, NULL)", 
         [actions[i].id, actions[i].data.card.id, actions[i].date, 
@@ -96,9 +99,6 @@ getActionsHelper = function(filter, boardID, accessToken, accessTokenSecret){
           });
         }
         else {
-          //console.log('card moved: "' + actions[i].data.card.name 
-          // + '" from: "' + actions[i].data.listBefore.name + '" to: "' 
-          // + actions[i].data.listAfter.name + '"');
           client.query("INSERT INTO Action VALUES \
           ($1, $2, $3, $4, NULL, $5, $6, NULL, NULL, $7, $8, NULL, NULL)", 
           [actions[i].id, actions[i].data.card.id, actions[i].date, 
@@ -117,77 +117,274 @@ getActionsHelper = function(filter, boardID, accessToken, accessTokenSecret){
 };
 
 module.exports = {
-	callback_check: 0,
+  callback_check: 0,
 
-	login: function(req, res) {
+  login: function(req, res) {
     this.callback_check = 1;
-		oauth.getOAuthRequestToken(function(error, token, tokenSecret, results){
-			// console.log(`in getOAuthRequestToken - token: ${token}, 
-			// tokenSecret: ${tokenSecret}, resultes ${JSON.stringify(results)}, 
-			// error: ${JSON.stringify(error)}`);
-			trello_oauth_secrets.trellotoken = tokenSecret;
-			
-			console.log(res);
-			res.redirect(`${trelloAuthorizeURL}?oauth_token=${token}&name=${appName}`);
-		});
-	},
+    oauth.getOAuthRequestToken(function(error, token, tokenSecret, results){
+      // console.log(`in getOAuthRequestToken - token: ${token}, 
+      // tokenSecret: ${tokenSecret}, resultes ${JSON.stringify(results)}, 
+      // error: ${JSON.stringify(error)}`);
+      trello_oauth_secrets.trellotoken = tokenSecret;
+      
+      //console.log(res);
+      res.redirect(`${trelloAuthorizeURL}?oauth_token=${token}&name=${appName}`);
+    });
+  },
 
-	callback: function(request, response) {
-		this.callback_check = 2;
-		const query = url.parse(request.url, true).query;
-    console.log(query);
-		const token = query.oauth_token;
-		const tokenSecret = trello_oauth_secrets.trellotoken;
-		const verifier = query.oauth_verifier;
-		oauth.getOAuthAccessToken(token, tokenSecret, verifier, 
-		function(error, accessToken, accessTokenSecret, results){
-  		// console.log(`in getOAuthAccessToken - accessToken: ${accessToken}, 
-  		//accessTokenSecret: ${accessTokenSecret}, error: ${error}`);
-  		client.connect();
+  callback: function(request, response) {
+
+    this.callback_check = 2;
+    const query = url.parse(request.url, true).query;
+    // console.log("query");
+    // console.log(query);
+    const token = query.oauth_token;
+    const tokenSecret = trello_oauth_secrets.trellotoken;
+    const verifier = query.oauth_verifier;
+    oauth.getOAuthAccessToken(token, tokenSecret, verifier, 
+    function(error, accessToken, accessTokenSecret, results){
+      console.log(accessToken);
+      console.log(accessTokenSecret);
+      // console.log(`in getOAuthAccessToken - accessToken: ${accessToken}, 
+      //accessTokenSecret: ${accessTokenSecret}, error: ${error}`);
+
+      client.connect();
   
-  		// get user
-  		oauth.getProtectedResource("https://api.trello.com/1/members/me", "GET", 
-  		accessToken, accessTokenSecret, function(error, data, response){
-      	// console.log(`in getProtectedResource - accessToken: ${accessToken}, 
-      	// accessTokenSecret: ${accessTokenSecret}`);
-      	// console.log('GET USER');
-      	var user = JSON.parse(data);
-      	const checkuser = client.query(new Query(
+      // get user
+      oauth.getProtectedResource("https://api.trello.com/1/members/me", "GET", 
+      accessToken, accessTokenSecret, function(error, data, response){
+        // console.log(`in getProtectedResource - accessToken: ${accessToken}, 
+        // accessTokenSecret: ${accessTokenSecret}`);
+        // console.log('GET USER');
+        var user = JSON.parse(data);
+        const checkuser = client.query(new Query(
           "SELECT count(*) FROM Member WHERE id=($1)", [user.id]));
-      	checkuser.on('row', (row) => {
-        		if (row.count == 0){
-            		client.query("INSERT INTO Member VALUES($1, $2)", 
-            		[user.id, user.fullName]);
-        		}
-      	});
-      	// checkuser.on('end', (end) => { 
-       //    done();
-       //  });
-  		});
+        checkuser.on('row', (row) => {
+            if (row.count == 0){
+                client.query("INSERT INTO Member VALUES($1, $2, $3)", 
+                [user.id, user.fullName, token]);
+            }
+            else {
+              client.query("UPDATE member SET accessToken=($1) WHERE id=($2)", 
+                [token, user.id]);
+            }
+        });
+      });
 
-  		// get boards
-  		oauth.getProtectedResource("https://api.trello.com/1/members/me/boards", 
+      // get boards
+      oauth.getProtectedResource("https://api.trello.com/1/members/me/boards", 
       "GET", accessToken, accessTokenSecret, function(error, data, response){
-    		// console.log('GET BOARDS');
-    		var boards = JSON.parse(data);
-    		var board_nothing = 1;
-    		for (i = 0; i < boards.length; i++) {
-          // console.log(boards[i]);
+        var boards = JSON.parse(data);
+        var board_nothing = 1;
+        for (i = 0; i < boards.length; i++) {
           var memberships = [];
           for (j = 0; j < boards[i].memberships.length; j++){
             memberships.push(boards[i].memberships[j].idMember);
-            // console.log(memberships);
           }
 
-    			client.query("INSERT INTO Board VALUES ($1, $2, $3, $4)", 
-    			[boards[i].id, boards[i].name, boards[i].shortUrl, memberships], 
+          client.query("INSERT INTO Board VALUES ($1, $2, $3, $4)", 
+          [boards[i].id, boards[i].name, boards[i].shortUrl, memberships], 
           function(err, result){
-    				if (err){
-          		// console.log("error: " + err);
-    					board_nothing=1;
-    				}
-    			});
+            if (err){
+              // console.log("error: " + err);
+              board_nothing=1;
+            }
+          });
 
+          // get unarchived lists
+          oauth.getProtectedResource("https://api.trello.com/1/boards/" 
+          + boards[i].id + "/lists", "GET", accessToken, accessTokenSecret, 
+          function(error, data, response){
+            var lists = JSON.parse(data);
+            var list_nothing = 1;
+            if (lists[0]){
+              const boardmemberships = client.query(new Query("SELECT memberships \
+                from Board where id=($1)", [lists[0].idBoard]));
+              boardmemberships.on('row', (row) => {
+                var memberships1 = row.memberships;
+                for(i=0; i < lists.length; i++){
+                  client.query("INSERT INTO List VALUES ($1, $2, $3, $4, $5)", 
+                  [lists[i].id, lists[i].idBoard, lists[i].name, lists[i].closed, 
+                  memberships1], 
+                  function(err, result){ 
+                    if(err){
+                      // console.log("error: " + err);
+                      list_nothing = 1;
+                    }
+                  });
+                  // get unarchived cards for each list
+                  oauth.getProtectedResource("https://api.trello.com/1/lists/" 
+                  + lists[i].id + "/cards?since=" + two_years_ago, "GET", 
+                  accessToken, accessTokenSecret, function(error, data, response){
+                    var cards = JSON.parse(data);
+                    var card_nothing = 1;
+                    for(i=0; i < cards.length; i++){
+                      // console.log("card name:" + cards[i].name);
+                      if (cards[i].due == null){
+                        client.query("INSERT INTO Card VALUES \
+                        ($1, $2, $3, NULL, $4, $5, $6, NULL, $7, $8, $9)", 
+                        [cards[i].id, cards[i].name, cards[i].desc, 
+                        cards[i].dueComplete, cards[i].idBoard, cards[i].idList, 
+                        cards[i].shortUrl, cards[i].closed, memberships1], 
+                        function(err, result){  
+                          if(err){
+                            // console.log("error: " + err);
+                            card_nothing = 1;
+                          }
+                        });
+                      }
+                      else {
+                        client.query("INSERT INTO Card VALUES \
+                        ($1, $2, $3, $4, $5, $6, $7, NULL, $8, $9, $10)", 
+                        [cards[i].id, cards[i].name, cards[i].desc, cards[i].due, 
+                        cards[i].dueComplete, cards[i].idBoard, cards[i].idList, 
+                        cards[i].shortUrl, cards[i].closed, memberships1], 
+                        function(err, result){   
+                          if(err){
+                            // console.log("error: " + err);
+                            card_nothing = 1;
+                          }
+                        });
+                      }
+                    }
+                  });
+                  // get archived cards
+                  oauth.getProtectedResource("https://api.trello.com/1/lists/" 
+                  + lists[i].id + "/cards?filter=closed&since=" + two_years_ago, 
+                  "GET", accessToken, accessTokenSecret, 
+                  function(error, data, response){
+                    // console.log(data);
+                    var cards = JSON.parse(data);
+                    var card_nothing = 1;
+                    for(i=0; i < cards.length; i++){
+                      //console.log("card name:" + cards[i].name);
+                      if (cards[i].due == null){
+                        client.query("INSERT INTO Card VALUES \
+                        ($1, $2, $3, NULL, $4, $5, $6, NULL, $7, $8, $9)", 
+                        [cards[i].id, cards[i].name, cards[i].desc, 
+                        cards[i].dueComplete, cards[i].idBoard, cards[i].idList, 
+                        cards[i].shortUrl, cards[i].closed, memberships1], 
+                        function(err, result){  
+                          if(err){
+                            // console.log("error: " + err);
+                            card_nothing = 1;
+                          }
+                        });
+                      }
+                      else {
+                        client.query("INSERT INTO Card VALUES \
+                        ($1, $2, $3, $4, $5, $6, $7, NULL, $8, $9, $10)", 
+                        [cards[i].id, cards[i].name, cards[i].desc, cards[i].due, 
+                        cards[i].dueComplete, cards[i].idBoard, cards[i].idList, 
+                        cards[i].shortUrl, cards[i].closed, memberships1], 
+                        function(err, result){  
+                          if(err){
+                            // console.log("error: " + err);
+                            card_nothing = 1;
+                          }
+                        });
+                      }
+                    }
+                  });
+                }
+              });
+            } 
+          });
+          // get archived lists
+          oauth.getProtectedResource("https://api.trello.com/1/boards/" 
+          + boards[i].id + "/lists?filter=closed", "GET", 
+          accessToken, accessTokenSecret, function(error, data, response){
+            var lists = JSON.parse(data);
+            var list_nothing = 1;
+            if (lists[0]){
+              const boardmemberships = client.query(new Query("SELECT memberships \
+                from Board where id=($1)", [lists[0].idBoard]));
+              boardmemberships.on('row', (row) => {
+                var memberships1 = row.memberships;
+                for(i=0; i < lists.length; i++){
+                  client.query("INSERT INTO List VALUES ($1, $2, $3, $4, $5)", 
+                  [lists[i].id, lists[i].idBoard, lists[i].name, lists[i].closed, 
+                  memberships1], 
+                  function(err, result){  
+                    if(err){
+                      // console.log("error: " + err);
+                      list_nothing = 1;
+                    }
+                  });
+                  // get unarchived cards for each list
+                  oauth.getProtectedResource("https://api.trello.com/1/lists/" 
+                  + lists[i].id + "/cards?since=" + two_years_ago, "GET", 
+                  accessToken, accessTokenSecret, function(error, data, response){
+                    var cards = JSON.parse(data);
+                    var card_nothing = 1;
+                    for(i=0; i < cards.length; i++){
+                      if (cards[i].due == null){
+                        client.query("INSERT INTO Card VALUES \
+                        ($1, $2, $3, NULL, $4, $5, $6, NULL, $7, $8, $9)", 
+                        [cards[i].id, cards[i].name, cards[i].desc, 
+                        cards[i].dueComplete, cards[i].idBoard, cards[i].idList, 
+                        cards[i].shortUrl, cards[i].closed, memberships1], 
+                        function(err, result){    
+                          if(err){
+                            // console.log("error: " + err);
+                            card_nothing = 1;
+                          }
+                        });
+                      }
+                      else {
+                        client.query("INSERT INTO Card VALUES \
+                        ($1, $2, $3, $4, $5, $6, $7, NULL, $8, $9, $10)", 
+                        [cards[i].id, cards[i].name, cards[i].desc, cards[i].due, 
+                        cards[i].dueComplete, cards[i].idBoard, cards[i].idList, 
+                        cards[i].shortUrl, cards[i].closed, memberships1], 
+                        function(err, result){  
+                          if(err){
+                            // console.log("error: " + err);
+                            card_nothing = 1;
+                          }
+                        });
+                      }
+                    }
+                  });
+                  // get archived cards
+                  oauth.getProtectedResource("https://api.trello.com/1/lists/" 
+                  + lists[i].id + "/cards?filter=closed&since=" + two_years_ago, "GET", 
+                  accessToken, accessTokenSecret, function(error, data, response){
+                    var cards = JSON.parse(data);
+                    var card_nothing = 1;
+                    for(i=0; i < cards.length; i++){
+                      if (cards[i].due == null){
+                        client.query("INSERT INTO Card VALUES \
+                        ($1, $2, $3, NULL, $4, $5, $6, NULL, $7, $8, $9)", 
+                        [cards[i].id, cards[i].name, cards[i].desc, 
+                        cards[i].dueComplete, cards[i].idBoard, cards[i].idList, 
+                        cards[i].shortUrl, cards[i].closed, memberships1], 
+                        function(err, result){    
+                          if(err){
+                            // console.log("error: " + err);
+                            card_nothing = 1;
+                          }
+                        });
+                      }
+                      else {
+                        client.query("INSERT INTO Card VALUES \
+                        ($1, $2, $3, $4, $5, $6, $7, NULL, $8, $9, $10)", 
+                        [cards[i].id, cards[i].name, cards[i].desc, cards[i].due, 
+                        cards[i].dueComplete, cards[i].idBoard, cards[i].idList, 
+                        cards[i].shortUrl, cards[i].closed, memberships1], 
+                        function(err, result){  
+                          if(err){
+                            // console.log("error: " + err);
+                            card_nothing = 1;
+                          }
+                        });
+                      }
+                    }
+                  });
+                }
+              });
+            }
+          });
           // get actions
           getActionsHelper("createCard", boards[i].id, accessToken, 
             accessTokenSecret);
@@ -195,187 +392,10 @@ module.exports = {
             accessTokenSecret);
           getActionsHelper("updateCard:closed", boards[i].id, accessToken, 
             accessTokenSecret);
-
-      		// get unarchived lists
-      		oauth.getProtectedResource("https://api.trello.com/1/boards/" 
-      		+ boards[i].id + "/lists", "GET", accessToken, accessTokenSecret, 
-      		function(error, data, response){
-        		// console.log('GET UNARCHIVED LISTS');
-        		var lists = JSON.parse(data);
-        		var list_nothing = 1;
-        		for(i=0; i < lists.length; i++){
-          		client.query("INSERT INTO List VALUES ($1, $2, $3, $4)", 
-          		[lists[i].id, lists[i].idBoard, lists[i].name, lists[i].closed], 
-          		function(err, result){ 
-            		if(err){
-              		// console.log("error: " + err);
-              		list_nothing = 1;
-            		}
-          		});
-          		// get unarchived cards for each list
-          		oauth.getProtectedResource("https://api.trello.com/1/lists/" 
-          		+ lists[i].id + "/cards?since=" + two_years_ago, "GET", 
-          		accessToken, accessTokenSecret, function(error, data, response){
-            		// console.log('GET UNARCHIVED CARDS');
-            		var cards = JSON.parse(data);
-            		var card_nothing = 1;
-            		for(i=0; i < cards.length; i++){
-                  // console.log("card name:" + cards[i].name);
-              		if (cards[i].due == null){
-                    client.query("INSERT INTO Card VALUES \
-                    ($1, $2, $3, NULL, $4, $5, $6, NULL, $7, $8)", 
-                		[cards[i].id, cards[i].name, cards[i].desc, 
-                    cards[i].dueComplete, cards[i].idBoard, cards[i].idList, 
-                    cards[i].shortUrl, cards[i].closed], function(err, result){  
-                  		if(err){
-                    		// console.log("error: " + err);
-                    		card_nothing = 1;
-                  		}
-                		});
-              		}
-              		else {
-                    client.query("INSERT INTO Card VALUES \
-                    ($1, $2, $3, $4, $5, $6, $7, NULL, $8, $9)", 
-                		[cards[i].id, cards[i].name, cards[i].desc, cards[i].due, 
-                    cards[i].dueComplete, cards[i].idBoard, cards[i].idList, 
-                    cards[i].shortUrl, cards[i].closed], function(err, result){   
-                  		if(err){
-                    		// console.log("error: " + err);
-                    		card_nothing = 1;
-                  		}
-                		});
-              		}
-            		}
-          		});
-          		// get archived cards
-          		oauth.getProtectedResource("https://api.trello.com/1/lists/" 
-          		+ lists[i].id + "/cards?filter=closed&since=" + two_years_ago, 
-          		"GET", accessToken, accessTokenSecret, 
-          		function(error, data, response){
-            		// console.log('GET ARCHIVED CARDS');
-                // console.log(data);
-            		var cards = JSON.parse(data);
-            		var card_nothing = 1;
-            		for(i=0; i < cards.length; i++){
-                  //console.log("card name:" + cards[i].name);
-              		if (cards[i].due == null){
-                		client.query("INSERT INTO Card VALUES \
-                    ($1, $2, $3, NULL, $4, $5, $6, NULL, $7, $8)", 
-                		[cards[i].id, cards[i].name, cards[i].desc, 
-                    cards[i].dueComplete, cards[i].idBoard, cards[i].idList, 
-                    cards[i].shortUrl, cards[i].closed], function(err, result){  
-                  		if(err){
-                    		// console.log("error: " + err);
-                    		card_nothing = 1;
-                  		}
-                		});
-              		}
-              		else {
-                		client.query("INSERT INTO Card VALUES \
-                    ($1, $2, $3, $4, $5, $6, $7, NULL, $8, $9)", 
-                		[cards[i].id, cards[i].name, cards[i].desc, cards[i].due, 
-                    cards[i].dueComplete, cards[i].idBoard, cards[i].idList, 
-                    cards[i].shortUrl, cards[i].closed], function(err, result){  
-                  		if(err){
-                    		// console.log("error: " + err);
-                    		card_nothing = 1;
-                  		}
-                		});
-              		}
-            		}
-          		});
-        		}
-      		});
-      		// get archived lists
-      		oauth.getProtectedResource("https://api.trello.com/1/boards/" 
-      		+ boards[i].id + "/lists?filter=closed", "GET", 
-      		accessToken, accessTokenSecret, function(error, data, response){
-        		// console.log('GET ARCHIVED LISTS');
-        		var lists = JSON.parse(data);
-        		var list_nothing = 1;
-        		for(i=0; i < lists.length; i++){
-          		client.query("INSERT INTO List VALUES ($1, $2, $3, $4)", 
-          		[lists[i].id, lists[i].idBoard, lists[i].name, lists[i].closed], 
-          		function(err, result){  
-            		if(err){
-              		// console.log("error: " + err);
-              		list_nothing = 1;
-            		}
-          		});
-          		// get unarchived cards for each list
-          		oauth.getProtectedResource("https://api.trello.com/1/lists/" 
-          		+ lists[i].id + "/cards?since=" + two_years_ago, "GET", 
-              accessToken, accessTokenSecret, function(error, data, response){
-            		// console.log('GET UNARCHIVED CARDS');
-            		var cards = JSON.parse(data);
-            		var card_nothing = 1;
-            		for(i=0; i < cards.length; i++){
-                	//console.log("card name:" + cards[i].name);
-              		if (cards[i].due == null){
-                		client.query("INSERT INTO Card VALUES \
-                    ($1, $2, $3, NULL, $4, $5, $6, NULL, $7, $8)", 
-                		[cards[i].id, cards[i].name, cards[i].desc, 
-                    cards[i].dueComplete, cards[i].idBoard, cards[i].idList, 
-                    cards[i].shortUrl, cards[i].closed], function(err, result){    
-                  		if(err){
-                    		// console.log("error: " + err);
-                    		card_nothing = 1;
-                  		}
-                		});
-              		}
-              		else {
-                		client.query("INSERT INTO Card VALUES \
-                    ($1, $2, $3, $4, $5, $6, $7, NULL, $8, $9)", 
-                		[cards[i].id, cards[i].name, cards[i].desc, cards[i].due, 
-                    cards[i].dueComplete, cards[i].idBoard, cards[i].idList, 
-                    cards[i].shortUrl, cards[i].closed], function(err, result){  
-                  		if(err){
-                    		// console.log("error: " + err);
-                    		card_nothing = 1;
-                  		}
-                		});
-              		}
-            		}
-          		});
-          		// get archived cards
-          		oauth.getProtectedResource("https://api.trello.com/1/lists/" 
-          		+ lists[i].id + "/cards?filter=closed&since=" + two_years_ago, "GET", 
-          		accessToken, accessTokenSecret, function(error, data, response){
-            		// console.log('GET ARCHIVED CARDS');
-            		var cards = JSON.parse(data);
-            		var card_nothing = 1;
-            		for(i=0; i < cards.length; i++){
-                	//console.log("card name:" + cards[i].name);
-              		if (cards[i].due == null){
-                		client.query("INSERT INTO Card VALUES \
-                    ($1, $2, $3, NULL, $4, $5, $6, NULL, $7, $8)", 
-                		[cards[i].id, cards[i].name, cards[i].desc, 
-                    cards[i].dueComplete, cards[i].idBoard, cards[i].idList, 
-                    cards[i].shortUrl, cards[i].closed], function(err, result){    
-                  		if(err){
-                    		// console.log("error: " + err);
-                    		card_nothing = 1;
-                  		}
-                		});
-              		}
-              		else {
-                		client.query("INSERT INTO Card VALUES \
-                    ($1, $2, $3, $4, $5, $6, $7, NULL, $8, $9)", 
-                		[cards[i].id, cards[i].name, cards[i].desc, cards[i].due, 
-                    cards[i].dueComplete, cards[i].idBoard, cards[i].idList, 
-                    cards[i].shortUrl, cards[i].closed], function(err, result){  
-                  		if(err){
-                    		// console.log("error: " + err);
-                    		card_nothing = 1;
-                  		}
-                		});
-              		}
-            		}
-          		});
-        		}
-      		});
-     		}
-  		});
-		});
-	}
+        }
+      });
+    });
+    // wait(5000);
+    // client.end();
+  }
 }

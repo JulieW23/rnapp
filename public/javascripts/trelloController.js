@@ -4,19 +4,37 @@ angular.module('trello', [])
 	$scope.getHistory = getHistory;
 	$scope.openTab = openTab;
 	$scope.generateFigure = generateFigure;
-	// Get boards
-	$http.get('/trello/boards')
+
+	// Get oauth_token from url
+	urlParam = function(name){
+		var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+		return results[1] || 0;
+	}
+	var token = urlParam("oauth_token");
+	// console.log(token);
+	
+	// Get member
+	$http.get('/trello/member/' + token)
 	.success((data) => {
-		if (! sessionStorage.justOnce) {
-        	sessionStorage.setItem("justOnce", "true");
-        	location.reload();
-    	}
-		$scope.boardData = data;
-		// console.log(data);
+		var memberid = data[0].id;
+		//console.log(memberid);
+
+		// Get boards
+		$http.get('/trello/boards/' + memberid)
+		.success((data) => {
+			$scope.boardData = data;
+			// console.log(data);
+		})
+		.error((error) => {
+			console.log('Error: ' + error);
+		});
+
 	})
 	.error((error) => {
 		console.log('Error: ' + error);
 	});
+	
+	
 	// Get open lists
 	$http.get('/trello/openlists')
 	.success((data) => {

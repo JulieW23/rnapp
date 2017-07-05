@@ -163,7 +163,7 @@ function generateFigure(idBoard, tabName){
 				if (err) {
 					throw err;
 				}
-				console.log(table_cells);
+				// console.log(table_cells);
 				// ALL DATA IS STORED AND READY TO BE USED
 				// list graph data
 				var display_time = new Array(length);

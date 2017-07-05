@@ -22,7 +22,8 @@ client.query(
 	id varchar(25) PRIMARY KEY, \
 	idBoard varchar(25) NOT NULL REFERENCES Board(id), \
 	name varchar(100) NOT NULL, \
-	closed boolean DEFAULT false)'
+	closed boolean DEFAULT false, \
+	memberships text[])'
 );
 // Create Card table
 client.query(
@@ -36,7 +37,8 @@ client.query(
 	idList varchar(25) NOT NULL REFERENCES List(id), \
 	idMembers text[], \
 	shortURL varchar(40) NOT NULL, \
-	closed boolean DEFAULT false)'
+	closed boolean DEFAULT false, \
+	memberships text[])'
 );
 // Create Checklist table
 client.query(
@@ -58,7 +60,8 @@ client.query(
 client.query(
 	'CREATE TABLE Member(\
 	id varchar(25) PRIMARY KEY, \
-	name varchar(50))'
+	name varchar(50), \
+	accessToken varchar(100) NOT NULL)'
 );
 // Store Trello actions
 // ISSUE: how to get comments
