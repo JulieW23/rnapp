@@ -7,10 +7,11 @@ const app = require('../app');
 var config = require("../config.js");
 //const connectionString = config.databaseURL;
 var pool = new pg.Pool({
-    database: 'rapidnovordb',
-    user: 'postgres',
-    password: 'Pinkbird222',
-    port: 5432
+    database: config.databaseName,
+    user: config.databaseUser,
+    password: config.databasePassword,
+    port: config.databasePort,
+    host: config.databaseHost
 });
 
 

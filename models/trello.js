@@ -81,7 +81,7 @@ client.query(
 // then type is one of: updateBoard, createBoard
 
 // Create Action table
-client.query(
+const query = client.query(new Query(
 	'CREATE TABLE Action(\
 	id varchar(25) PRIMARY KEY, \
 	idCard varchar(25),\
@@ -96,17 +96,6 @@ client.query(
 	listAfterId varchar(25), \
 	closedInListId varchar(25), \
 	closed boolean)'
-);
-
-// Timestamp
-client.query(
-	'CREATE TABLE Time(\
-	lastUpdate timestamp PRIMARY KEY)'
-);
-
-// Webhook id
-const query = client.query(new Query(
-	'CREATE TABLE Webhook(\
-	id varchar(25) PRIMARY KEY)'
 ));
+
 query.on('end', () => { client.end(); });
