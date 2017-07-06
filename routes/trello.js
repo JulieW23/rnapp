@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const pg = require('pg');
-const {Client, Query} = require('pg');
+//const {Client, Query} = require('pg');
 const path = require('path');
 const app = require('../app');
 var config = require("../config.js");
@@ -31,7 +31,7 @@ function getHelper(req, res, next, queryString) {
             return res.status(500).json({sucess: false, data: err});
         }
         // SQL Query > Select Data
-        const query = client.query(new Query(queryString));
+        const query = client.query(new pg.Query(queryString));
         query.on('row', (row) => {
             results.push(row);
         });
@@ -138,7 +138,7 @@ router.get('/actions/:idCard', (req, res, next) => {
             console.log(err);
             return res.status(500).json({success: false, data: err});
         }
-        const query = client.query(new Query('SELECT * FROM Action WHERE idCard=($1)', [idCard]));
+        const query = client.query(new pg.Query('SELECT * FROM Action WHERE idCard=($1)', [idCard]));
         query.on('row', (row) => {
             results.push(row);
         });

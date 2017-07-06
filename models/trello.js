@@ -1,5 +1,5 @@
 const pg = require('pg');
-const {Client, Query} = require('pg');
+//const {Client, Query} = require('pg');
 var config = require("../config.js");
 //const connectionString = config.databaseURL;
 const connectionString = "postgres://" + config.databaseUser + ":" 
@@ -81,7 +81,7 @@ client.query(
 // then type is one of: updateBoard, createBoard
 
 // Create Action table
-const query = client.query(new Query(
+const query = client.query(new pg.Query(
 	'CREATE TABLE Action(\
 	id varchar(25) PRIMARY KEY, \
 	idCard varchar(25),\
