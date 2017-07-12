@@ -129,6 +129,7 @@ client.query("INSERT INTO Action VALUES ('actionid30', 'cardid10', '2016-01-05 0
 // closed cardid10 in listid4
 const query = client.query(new pg.Query("INSERT INTO Action VALUES ('actionid31', 'cardid10', '2016-01-26 00:00:00.000', 'updateCard', NULL, NULL, NULL, 'List A2', NULL, NULL, NULL, 'listid4', NULL, NULL, 'true')"));
 
+// close psql connection
 query.on('end', () => { client.end(); });
 
 /* ====== EXPECTED RESULTS ===== */
@@ -168,9 +169,3 @@ query.on('end', () => { client.end(); });
 
 /* Board 3, List B3 (listid7) */
 // N/A
-
-
-
-
-
-

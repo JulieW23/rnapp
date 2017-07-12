@@ -1,0 +1,37 @@
+/* ====== EXPECTED RESULTS ===== */
+
+/* Board 1, List A1 (listid1) */
+// Card1: 13 days 
+// Card3: 30 days 
+// Card4: 31 days
+// Card5: 27 days
+// Card6: 30 days
+// Card7: 24 days
+// Card8: 1 day
+// Card9: 10 days
+// Cards10: 4 days
+
+/* Board 1, List B1 (listid2) */
+// Card1: 1 day
+// Card5: 7 days
+// Card7: 9 days
+// Card9: 10 days
+
+/* Board 1, List C1 (listid3) */
+// N/A
+
+/* Board 2, List A2 (listid4) */
+// Card5: 1 day
+// Card6: 1 day
+// Card7: 1 day
+// Card8: 10 days
+// Card10: 21 days
+
+/* Board 2, List B2 (listid5) */
+// Card8: 21 days
+
+/* Board 3, List A3 (listid6) */
+// Card7: 21 days
+
+/* Board 3, List B3 (listid7) */
+// N/A
