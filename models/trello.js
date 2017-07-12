@@ -1,7 +1,5 @@
 const pg = require('pg');
-//const {Client, Query} = require('pg');
 var config = require("../config.js");
-//const connectionString = config.databaseURL;
 const connectionString = "postgres://" + config.databaseUser + ":" 
 + config.databasePassword + "@" + config.databaseHost + ":" 
 + config.databasePort + "/" + config.databaseName;
@@ -35,27 +33,26 @@ client.query(
 	dueComplete boolean DEFAULT false, \
 	idBoard varchar(25) NOT NULL REFERENCES Board(id), \
 	idList varchar(25) NOT NULL REFERENCES List(id), \
-	idMembers text[], \
 	shortURL varchar(40) NOT NULL, \
 	closed boolean DEFAULT false, \
 	memberships text[])'
 );
 // Create Checklist table
-client.query(
-	'CREATE TABLE Checklist(\
-	id varchar(25) PRIMARY KEY, \
-	idBoard varchar(25) NOT NULL REFERENCES Board(id), \
-	idCard varchar(25) NOT NULL REFERENCES Card(id), \
-	name varchar(100) NOT NULL)'
-);
+// client.query(
+// 	'CREATE TABLE Checklist(\
+// 	id varchar(25) PRIMARY KEY, \
+// 	idBoard varchar(25) NOT NULL REFERENCES Board(id), \
+// 	idCard varchar(25) NOT NULL REFERENCES Card(id), \
+// 	name varchar(100) NOT NULL)'
+// );
 // Create ChecklistItem table
-client.query(
-	'CREATE TABLE ChecklistItem(\
-	id varchar(25) PRIMARY KEY, \
-	idChecklist varchar(25) NOT NULL REFERENCES Checklist(id), \
-	name varchar(100) NOT NULL, \
-	state boolean DEFAULT false)'
-);
+// client.query(
+// 	'CREATE TABLE ChecklistItem(\
+// 	id varchar(25) PRIMARY KEY, \
+// 	idChecklist varchar(25) NOT NULL REFERENCES Checklist(id), \
+// 	name varchar(100) NOT NULL, \
+// 	state boolean DEFAULT false)'
+// );
 // Create Member table
 client.query(
 	'CREATE TABLE Member(\
@@ -95,6 +92,8 @@ const query = client.query(new pg.Query(
 	listBeforeId varchar(25), \
 	listAfterId varchar(25), \
 	closedInListId varchar(25), \
+	boardBeforeId varchar(25), \
+	boardAfterId varchar(25), \
 	closed boolean)'
 ));
 

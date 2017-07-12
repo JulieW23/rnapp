@@ -1,11 +1,9 @@
 var express = require('express');
 var router = express.Router();
 const pg = require('pg');
-//const {Client, Query} = require('pg');
 const path = require('path');
 const app = require('../app');
 var config = require("../config.js");
-//const connectionString = config.databaseURL;
 var pool = new pg.Pool({
     database: config.databaseName,
     user: config.databaseUser,
@@ -13,7 +11,6 @@ var pool = new pg.Pool({
     port: config.databasePort,
     host: config.databaseHost
 });
-
 
 /* GET users listing. */
 // router.get('/', function(req, res, next) {
@@ -116,6 +113,37 @@ router.get('/cards/list/:idList', (req, res, next) => {
     const idList = req.params.idList;
     const qs = "SELECT * FROM Card WHERE idList='" + idList + "'";
     getHelper(req, res, next, qs);
+});
+
+/* GET cards by memberships, given accessToken */
+router.get('/cards/memberships/:accessToken', (req, res, next) => {
+    // get access token
+    const accessToken = req.params.accessToken;
+    // query statement to get userid using accesstoken
+    const qs1 = "SELECT id FROM Member WHERE accesstoken='" + accessToken + "'";
+    const results = [];
+    // get userid
+    pool.connect(function (err, client, done){
+        if(err){
+            done();
+            console.log(err);
+            return res.status(500).json({sucess: false, data: err});
+        }
+        const query = client.query(new pg.Query(qs1));
+        query.on('row', (row) => {
+            results.push(row);
+        });
+        // userid has been obtained
+        query.on('end', () => {
+            done();
+            // return res.json(results[0].id);
+            var userid = results[0].id;
+            // query statement to get the cards containing userid in memberships
+            const qs2 = "SELECT * FROM Card WHERE memberships @> array['" + userid + "']::text[]";
+            // get cards
+            getHelper(req, res, next, qs2);
+        });
+    });
 });
 
 

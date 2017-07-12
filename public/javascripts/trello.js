@@ -11,6 +11,11 @@ function wait(ms){
   }
 }
 
+// Get oauth_token from url
+urlParam = function(name){
+	var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+	return results[1] || 0;
+}
 
 // Limits date picker so user cannot select future dates
 $(function(){
@@ -103,6 +108,8 @@ function generateFigure(idBoard, tabName){
 			toDate = document.getElementById("listToDate").value;
 		}
 	}
+	//oauth_token
+	var oauth_token = urlParam("oauth_token");
 	var num_days = (ms(toDate)-ms(fromDate))/86400000;
 	// lists id and name
 	var list_id_and_name = [];
@@ -120,7 +127,7 @@ function generateFigure(idBoard, tabName){
 	// [card.id, card.name, card.shorturl, card.idlist]
 	var card_id_and_name = [];
 	// get cards for this board
-	$.get('/trello/cards/' + idBoard, function(carddata){
+	$.get('/trello/cards/memberships/' + oauth_token, function(carddata){
 		cards = new Array(carddata.length);
 		$.each(carddata, function(index, card){
 			cards[index] = card;
@@ -197,7 +204,7 @@ function generateFigure(idBoard, tabName){
 								time += (ms(list_actions[i][j+1].date) - ms(list_actions[i][j].date))/3600000;
 							}
 							j++;
-							// if the next actino is for a different card
+							// if the next action is for a different card
 							if (list_actions[i][j+1] && list_actions[i][j].idcard != list_actions[i][j+1].idcard){
 								tTime[k] = time;
 								idCard[k] = current_idCard;
@@ -315,16 +322,21 @@ function generateFigure(idBoard, tabName){
 				// display distribution graph
 				else if (tabName == 'distribution-graph-tab'){
 					$('#distribution-graph').empty();
+					console.log(list_names);
+					console.log(distribution_data);
+					console.log(card_id_and_name);
 					for (i = 0; i < list_names.length; i++){
 						// go through distribution_data and replace card ids with card names
 						for (j = 0; j < distribution_data[i].length; j++){
     						for (k = 0; k < distribution_data[i][j].cards.length; k++){
     							for (n = 0; n < card_id_and_name.length; n++){
+    								//console.log(distribution_data[i][j].cards[k]);
     								if(distribution_data[i][j].cards[k] == card_id_and_name[n][0]){
     									distribution_data[i][j].cards[k] = "<br><a href='" 
     									+ card_id_and_name[n][2] + "'>" 
     									+ card_id_and_name[n][1] + "</a>";
     								}
+    								//console.log(distribution_data[i][j].cards[k]);
     							}
     						}
     					}
