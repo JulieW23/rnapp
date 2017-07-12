@@ -41,6 +41,23 @@
    
    /routes/trello.js - renders the Trello report page, and also defines endpoints for database queries for Trello data.
    
+## /login
+
+   This directory contains all the login handling, and code for populating the database.
+   
+   /login/trello_oauth.js - contains code for Trello login and putting data from Trello into the app's database.
+   
+## /tests
+   This directory contains tests for the app.
+   
+   /tests/trello_tests.js - test cases for data calculation.
+   
+   * After creating the database tables (by running "node models/trello.js), the data for the test cases can be inserted into the database by running the command "node tests/trello_tests.js". 
+   
+   * The expected calculation results are in the file trello_tests_results.txt
+   
+   * Go to http://localhost:3000/trello?oauth_token=accesstoken1 to use the app with the inserted test data.
+   
 ## /bin
 
    This directory contains server startup scripts. (Express auto-generated, unedited)
