@@ -16,6 +16,15 @@ table {
 	width:100%;
 }
 
+#overall-table{
+	padding: 40px;
+	font-size: 17px;
+}
+
+#overall-table td{
+	border: 1px solid black;
+}
+
 #card-details {
 	font-size: 12px;
 }

@@ -257,7 +257,8 @@ function generateFigure(idBoard, tabName){
 						// for every row of table
 						for (n = 1; n < table_cells.length; n++){
 							if (idCard[m] == table_cells[n][0]){
-								table_cells[n][i+3] = Math.round(tTime[m] * 100) / 100;
+								// table_cells[n][i+3] = Math.round(tTime[m] * 100) / 100;
+								table_cells[n][i+3] = Math.round((tTime[m]/24)*10) / 10;
 							}
 						}
 					}
@@ -317,6 +318,12 @@ function generateFigure(idBoard, tabName){
 				// display distribution graph
 				else if (tabName == 'distribution-graph-tab'){
 					$('#distribution-graph').empty();
+
+					// Create array for the overall table, 
+					// and insert the first row of the table
+					var averages_table = [['<b>List</b>', '<b>Average (Days)</b>', 
+					'<b>Standard Deviation (Days)</b>']];
+
 					// console.log(list_names);
 					// console.log(distribution_data);
 					// console.log(card_id_and_name);
@@ -344,10 +351,15 @@ function generateFigure(idBoard, tabName){
     						+ "'></div>");
 						Highcharts.chart('distribution-graph' + [i], {
         					chart: {
-            					type: 'column'
+            					type: 'column',
+            					zoomType: 'x'
         					},
         					title: {
            						text: 'Cards time distribution for list: ' + list_names[i]
+        					},
+        					subtitle: {
+            					text: document.ontouchstart === undefined ?
+                    				'Click and drag in the plot area to zoom in' : 'Pinch the chart to zoom in'
         					},
        						xAxis: {
        							title: {
@@ -392,6 +404,10 @@ function generateFigure(idBoard, tabName){
         					}]
     					}); // end of highcharts 
 
+    					// DISTRIBUTION TABLES FOR LISTS
+    					// console.log(distribution_data[i].slice(0, j+1));
+    					// var list_table = [];
+
     					// CALCULATE AVERAGE
     					var data_array = [];
     					for (j = 0; j < distribution_data[i].length; j++){
@@ -401,6 +417,7 @@ function generateFigure(idBoard, tabName){
     							}
     						}
     					}
+    					// console.log(data_array);
     					var average;
     					average = Math.round((data_array.reduce(add, 0) / data_array.length) * 100) / 100;
     					if (!(average >= 0)){
@@ -422,6 +439,27 @@ function generateFigure(idBoard, tabName){
     					else{
     						$('#distribution-graph' + [i]).append('<h4 style="text-align: center;">Standard Deviation: ' + standard_deviation + ' days</h4><br><br>');
     					}
+    					
+    					// overall table
+    					averages_table.push([list_names[i], average, standard_deviation]);
+    					$('#overall-table').empty();
+    					$('#overall-table').append("<h4>Average and Standard Deviation for the Number of Days Cards Spend in Each List:</h4>");
+    					var result = "<table>";
+						for (x = 0; x < averages_table.length; x++){
+							result += "<tr>";
+							for (y = 0; y < averages_table[x].length; y++){
+								if(x > 0 && y > 0 && !(averages_table[x][y] >= 0)){
+									result += "<td>no data</td>";
+								}
+								else{
+									result += "<td>" + averages_table[x][y] + "</td>";
+								}
+							}
+							result += "</tr>";
+						}
+						result += "</table>";
+						$('#overall-table').append(result);
+						$('#overall-table').append("<br><br><h3>Graphs for Each List:</h3>");
 					} // end of for each list
 				} // end of (if) display distribution graph
 			}); // end of calculation section
