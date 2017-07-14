@@ -1,14 +1,6 @@
+// helper function that reloads page
 function reload(){
 	location.reload();
-}
-
-
-function wait(ms){
-   var start = new Date().getTime();
-   var end = start;
-   while(end < start + ms) {
-     end = new Date().getTime();
-  }
 }
 
 // Get oauth_token from url
@@ -34,6 +26,8 @@ $(function(){
     $('.date_picker').attr('max', maxDate);
 });
 
+// if date picker is not supported on the browser being used, 
+// use jquery ui date picker instead
 $(function(){
 	if($('.date_picker')[0].type != 'date'){
 		$('.date_picker').datepicker({dateFormat: "yy-mm-dd", maxDate: new Date()});
@@ -60,7 +54,7 @@ function addMonths(date, months){
 
 // Process database data and generate the figure for the selected tab
 function generateFigure(idBoard, tabName){
-	// process time range
+	// process user selected time range
 	var fromDate;
 	var toDate;
 	if (tabName == 'distribution-table'){
@@ -108,7 +102,8 @@ function generateFigure(idBoard, tabName){
 			toDate = document.getElementById("listToDate").value;
 		}
 	}
-	//oauth_token
+	//oauth_token from url, used to identify the user, and get only cards that 
+	// the user has access to
 	var oauth_token = urlParam("oauth_token");
 	var num_days = (ms(toDate)-ms(fromDate))/86400000;
 	// lists id and name
@@ -295,8 +290,8 @@ function generateFigure(idBoard, tabName){
         					name: 'Average # hours',
             				data: display_time
         				}]
-    				});	
-				}
+    				});	// end of highcharts
+				} // end of display list chart
 				// display table
 				else if (tabName == 'distribution-table'){
 					$('#table').empty();
@@ -322,9 +317,9 @@ function generateFigure(idBoard, tabName){
 				// display distribution graph
 				else if (tabName == 'distribution-graph-tab'){
 					$('#distribution-graph').empty();
-					console.log(list_names);
-					console.log(distribution_data);
-					console.log(card_id_and_name);
+					// console.log(list_names);
+					// console.log(distribution_data);
+					// console.log(card_id_and_name);
 					for (i = 0; i < list_names.length; i++){
 						// go through distribution_data and replace card ids with card names
 						for (j = 0; j < distribution_data[i].length; j++){
@@ -395,7 +390,8 @@ function generateFigure(idBoard, tabName){
             					name: ' ',
             					data: distribution_data[i].slice(0, j+1)
         					}]
-    					});
+    					}); // end of highcharts 
+
     					// CALCULATE AVERAGE
     					var data_array = [];
     					for (j = 0; j < distribution_data[i].length; j++){
@@ -426,12 +422,12 @@ function generateFigure(idBoard, tabName){
     					else{
     						$('#distribution-graph' + [i]).append('<h4 style="text-align: center;">Standard Deviation: ' + standard_deviation + ' days</h4><br><br>');
     					}
-					}
-				}
-			});
-		});
-	});
-}
+					} // end of for each list
+				} // end of (if) display distribution graph
+			}); // end of calculation section
+		}); // end of get lists from database
+	}); // end of get cards from database
+} // end of generateFigure function
 
 
 // Display the selected tab

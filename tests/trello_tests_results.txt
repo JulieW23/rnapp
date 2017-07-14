@@ -10,6 +10,7 @@
 // Card8: 1 day
 // Card9: 10 days
 // Cards10: 4 days
+// Cards11: 4 days
 
 /* Board 1, List B1 (listid2) */
 // Card1: 1 day
@@ -34,4 +35,4 @@
 // Card7: 21 days
 
 /* Board 3, List B3 (listid7) */
-// N/A
+// Card11: 21 days

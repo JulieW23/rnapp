@@ -6,6 +6,7 @@ const connectionString = "postgres://" + config.databaseUser + ":"
 
 const client = new pg.Client(connectionString);
 client.connect();
+
 // Create Board table
 client.query(
 	'CREATE TABLE Board(\
@@ -14,6 +15,7 @@ client.query(
 	shortURL varchar(40) NOT NULL, \
 	memberships text[])'
 );
+
 // Create List table
 client.query(
 	'CREATE TABLE List(\
@@ -23,6 +25,7 @@ client.query(
 	closed boolean DEFAULT false, \
 	memberships text[])'
 );
+
 // Create Card table
 client.query(
 	'CREATE TABLE Card(\
@@ -37,6 +40,7 @@ client.query(
 	closed boolean DEFAULT false, \
 	memberships text[])'
 );
+
 // Create Checklist table
 // client.query(
 // 	'CREATE TABLE Checklist(\
@@ -53,6 +57,7 @@ client.query(
 // 	name varchar(100) NOT NULL, \
 // 	state boolean DEFAULT false)'
 // );
+
 // Create Member table
 client.query(
 	'CREATE TABLE Member(\
@@ -60,29 +65,23 @@ client.query(
 	name varchar(50), \
 	accessToken varchar(100) NOT NULL)'
 );
+
 // Store Trello actions
-// ISSUE: how to get comments
 // Create action type
 client.query(
 	"CREATE TYPE actiontype AS ENUM \
-	('updateCard', 'createCard')"
+	('updateCard', 'createCard', 'empty')"
 );
 
 // relevant card actions:
-// then type is one of: updateCard:closed, updateCard:idList, createCard, updateCard:name, updateCard:desc, deleteCard
-
-// relevant list actions
-// then type is one of: updateList:closed, updateList: name, createList
-
-// relevant board actions
-// then type is one of: updateBoard, createBoard
+// then type is one of: updateCard:closed, updateCard:idList, createCard
 
 // Create Action table
 const query = client.query(new pg.Query(
 	'CREATE TABLE Action(\
 	id varchar(25) PRIMARY KEY, \
 	idCard varchar(25),\
-	date timestamp NOT NULL, \
+	date timestamp, \
 	type actiontype NOT NULL, \
 	createdInList varchar(100), \
 	listBefore varchar(100), \

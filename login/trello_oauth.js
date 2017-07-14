@@ -3,8 +3,6 @@ var OAuth = require('oauth').OAuth
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 const pg = require('pg');
-//const {Client, Query} = require('pg');
-// const {Pool, Query} = require('pg');
 var url = require('url');
 var http = require('http');
 var async = require('async');
@@ -63,9 +61,6 @@ getActionsHelper = function(filter, boardID, accessToken, accessTokenSecret){
     var action_nothing = 1;
     for (i=0; i < actions.length; i++){
       if(actions[i].type == 'createCard'){
-        // if (actions[i].data.list.name == undefined){
-        //   console.log(actions[i].data.list.name);
-        // }
         pool.query("INSERT INTO Action VALUES \
         ($1, $2, $3, $4, $5, NULL, NULL, NULL, $6, NULL, NULL, NULL, NULL)", 
         [actions[i].id, actions[i].data.card.id, actions[i].date, 
@@ -76,8 +71,8 @@ getActionsHelper = function(filter, boardID, accessToken, accessTokenSecret){
             // console.log("error: " + err);
             action_nothing = 1;
           }
-        });
-      }
+        }); // end of insert createCard action into database
+      } // end of if action is createCard
       else if(actions[i].type == 'updateCard'){
         if(actions[i].data.old.closed!=null){
           pool.query("INSERT INTO Action VALUES \
@@ -89,8 +84,8 @@ getActionsHelper = function(filter, boardID, accessToken, accessTokenSecret){
               //console.log("error: " + err);
               action_nothing = 1;
             }
-          });
-        }
+          }); // end of insert updateCard:closed action into database
+        } // end of if action is updateCard:closed
         else {
           pool.query("INSERT INTO Action VALUES \
           ($1, $2, $3, $4, NULL, $5, $6, NULL, NULL, $7, $8, NULL, NULL)", 
@@ -102,12 +97,12 @@ getActionsHelper = function(filter, boardID, accessToken, accessTokenSecret){
               //console.log("error: " + err);
               action_nothing = 1;
             }
-          });
-        }
-      }
-    }
-  });
-};
+          }); // end of insert updateCard:idList into database
+        } // end of if action is updateCard:idList
+      } // end of if action is updateCard
+    } // end of for each action
+  }); // end of get actions from trello
+}; // end of getActionsHelper function
 
 module.exports = {
   callback_check: 0,
@@ -128,7 +123,6 @@ module.exports = {
 
     this.callback_check = 2;
     const query = url.parse(request.url, true).query;
-    // console.log(query);
     const token = query.oauth_token;
     const tokenSecret = trello_oauth_secrets.trellotoken;
     const verifier = query.oauth_verifier;
@@ -139,7 +133,7 @@ module.exports = {
       // console.log(`in getOAuthAccessToken - accessToken: ${accessToken}, 
       //accessTokenSecret: ${accessTokenSecret}, error: ${error}`);
   
-      // get user
+      // get user 
       oauth.getProtectedResource("https://api.trello.com/1/members/me", "GET", 
       accessToken, accessTokenSecret, function(error, data, response){
         // console.log(`in getProtectedResource - accessToken: ${accessToken}, 
@@ -147,7 +141,6 @@ module.exports = {
         var user = JSON.parse(data);
         pool.query("SELECT count(*) FROM Member WHERE id=($1)", [user.id])
         .then(res => {
-          //console.log(res.rows[0].count);
           if (res.rows[0].count == 0){
             pool.query("INSERT INTO Member VALUES($1, $2, $3)", 
             [user.id, user.fullName, token])
@@ -160,7 +153,7 @@ module.exports = {
           }
         })
         .catch(e => setImmediate(() => {throw e}))
-      });
+      }); // end of get user from trello
 
       // get boards
       oauth.getProtectedResource("https://api.trello.com/1/members/me/boards", 
@@ -179,7 +172,7 @@ module.exports = {
               // console.log("error: " + err);
               board_nothing=1;
             }
-          });
+          }); // end of insert board into database
 
           // get unarchived lists
           oauth.getProtectedResource("https://api.trello.com/1/boards/" 
@@ -201,7 +194,7 @@ module.exports = {
                       // console.log("error: " + err);
                       list_nothing = 1;
                     }
-                  });
+                  }); // end of insert list into database
 
                   // get unarchived cards for each list
                   oauth.getProtectedResource("https://api.trello.com/1/lists/" 
@@ -222,7 +215,7 @@ module.exports = {
                             card_nothing = 1;
                           }
                         });
-                      }
+                      } // end of if
                       else{
                         pool.query("INSERT INTO Card VALUES \
                         ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)", 
@@ -235,9 +228,9 @@ module.exports = {
                             card_nothing = 1;
                           }
                         });
-                      }
-                    }
-                  });
+                      } // end of else
+                    } // end of for each card
+                  }); // gend of get unarchived cards from trello
 
                   // get archived cards for each list
                   oauth.getProtectedResource("https://api.trello.com/1/lists/" 
@@ -259,7 +252,7 @@ module.exports = {
                             card_nothing = 1;
                           }
                         });
-                      }
+                      } // end of iff
                       else{
                         pool.query("INSERT INTO Card VALUES \
                         ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)", 
@@ -272,14 +265,14 @@ module.exports = {
                             card_nothing = 1;
                           }
                         });
-                      }
-                    }
-                  });
-                }
-              })
+                      } // end of else
+                    } // end of for each card
+                  }); // end of get archived cards from trello
+                } // end of for each list
+              }) // end of then
               .catch(e => setImmediate(() => {throw e}))
-            }
-          });
+            } // end of if list exists
+          }); // end of get unarchived lists from trello
 
           // get archvied lists
           oauth.getProtectedResource("https://api.trello.com/1/boards/" 
@@ -301,7 +294,7 @@ module.exports = {
                       // console.log("error: " + err);
                       list_nothing = 1;
                     }
-                  });
+                  }); // end of insert list into database
 
                   // get unarchived cards for each list
                   oauth.getProtectedResource("https://api.trello.com/1/lists/" 
@@ -322,7 +315,7 @@ module.exports = {
                             card_nothing = 1;
                           }
                         });
-                      }
+                      } // end of if
                       else{
                         pool.query("INSERT INTO Card VALUES \
                         ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)", 
@@ -335,9 +328,9 @@ module.exports = {
                             card_nothing = 1;
                           }
                         });
-                      }
-                    }
-                  });
+                      } // end of else
+                    } // end of for each card
+                  }); // end of get unarchived cards from trello
 
                   // get archived cards for each list
                   oauth.getProtectedResource("http://api.trello.com/1/lists/"
@@ -358,7 +351,7 @@ module.exports = {
                             card_nothing = 1;
                           }
                         });
-                      }
+                      } // end of it
                       else {
                         pool.query("INSERT INTO Card VALUES \
                         ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
@@ -370,15 +363,15 @@ module.exports = {
                             // console.log("error: " + err);
                             card_nothing = 1;
                           }
-                        });
-                      }
-                    }
-                  });
-                }
-              })
+                        }); 
+                      } // end of else
+                    } // end of for each card
+                  }); // end of get archived cards from trello
+                } // end of for each list
+              }) // end of then
               .catch(e => setImmediate(() => {throw e}))
-            }
-          });
+            } // end of if list exists
+          }); // end of get archived lists from trello
 
           // get actions
           getActionsHelper("createCard", boards[i].id, accessToken, accessTokenSecret);
@@ -387,108 +380,60 @@ module.exports = {
           getActionsHelper("updatedCard:closed", boards[i].id, accessToken, 
             accessTokenSecret);
 
-          // get moveCardFromBoard actions 
-          // oauth.getProtectedResource("https://api.trello.com/1/boards/" 
-          // + boards[i].id + "/actions?limit=1000&filter=moveCardFromBoard", 
-          // "GET", accessToken, accessTokenSecret, function(error, data, response){
-          //   var actions = JSON.parse(data);
-          //   var action_nothing = 1;
-          //   //for (j = 0; j < actions.length; j++){
-          //   // console.log(actions);
-          //   async.eachSeries(actions, function(action, done){
-          //     pool.query("SELECT count(*) FROM Action WHERE boardBeforeId=($1) \
-          //     and idCard=($2) and boardAfterId IS NULL", 
-          //     [action.data.board.id, action.data.card.id])
-          //     .then(res => {
-          //       // if there does not exist a matching row in database, create row
-          //       // fill in listBefore, listBeforeId and boardAfterId
-          //       if (res.rows[0].count == 0){
-          //         console.log(action);
-          //         pool.query("INSERT INTO Action VALUES \
-          //         ($1, $2, $3, $4, NULL, $5, NULL, NULL, NULL, $6, \
-          //         NULL, NULL, NULL, $7, NULL)",
-          //         [action.id, action.data.card.id, action.date, 
-          //         'updateCard', action.data.list.name, 
-          //         action.data.list.id, action.data.boardTarget.id], 
-          //         function(err, result){
-          //           if(err){
-          //             // console.log(err);
-          //             action_nothing = 1;
-          //           }
-          //           done();
-          //         });
-          //       }
-          //       // if row already exists, update it
-          //       // fill in listBefore, listBeforeId and boardAfterId
-          //       else {
-          //         pool.query("UPDATE Action SET boardAfterId=($1), \
-          //         listBefore=($2), listBeforeId=($3) WHERE \
-          //         boardBeforeId=($4) and idCard=($5) and boardAfterId IS NULL", 
-          //         [action.data.boardTarget.id, action.data.list.name, 
-          //         action.data.list.id, action.data.board.id, 
-          //         action.data.card.id], function(err, result){
-          //           if(err){
-          //             // console.log(err);
-          //             action_nothing = 1;
-          //           }
-          //           done();
-          //         });
-          //       }
-          //     })
-          //     .catch(e => setImmediate(() => {throw e}))
-          //   })
-          // });
-          // //get moveCardToBoard actions 
-          // oauth.getProtectedResource("https://api.trello.com/1/boards/" 
-          // + boards[i].id + "/actions?limit=1000&filter=moveCardToBoard", 
-          // "GET", accessToken, accessTokenSecret, function(error, data, response){
-          //   var actions = JSON.parse(data);
-          //   var action_nothing = 1;
-          //   async.eachSeries(actions, function(action, done){
-          //     // check if there already eixts a matching moveCardFromBoard in database
-          //     pool.query("SELECT count(*) FROM Action WHERE boardAfterId=($1) \
-          //     and idCard=($2) and boardBeforeId IS NULL",
-          //     [action.data.board.id, action.data.card.id])
-          //     .then(res => {
-          //       // if there does not exist a matching row in database, create row
-          //       // fill in listAfter, listAfterId, and boardBeforeId
-          //       if (res.rows[0].count == 0){
-          //         pool.query("INSERT INTO Action VALUES \
-          //         ($1, $2, $3, $4, NULL, NULL, $5, NULL, NULL, NULL, \
-          //         $6, NULL, $7, NULL, NULL)",
-          //         [action.id, action.data.card.id, action.date,
-          //         'updateCard', action.data.list.name, 
-          //         action.data.list.id, action.data.boardSource.id],
-          //         function(err, result){
-          //           if(err){
-          //             // console.log(err);
-          //             action_nothing=1;
-          //           }
-          //           done();
-          //         });
-          //       }
-          //       // if row aleady exists, update it
-          //       // fill in listAfter, listAfterId and boardBeforeId
-          //       else{
-          //         pool.query("UPDATE Action SET boardBeforeId=($1), \
-          //         listAfter=($2), listAfterId=($3) WHERE \
-          //         boardAfterId=($4) and idCard=($5) and boardBeforeId IS NULL",
-          //         [action.data.boardSource.id, action.data.list.name, 
-          //         action.data.list.id, action.data.board.id, 
-          //         action.data.card.id], function(err, result){
-          //           if(err){
-          //             // console.log(err);
-          //             action_nothing = 1;
-          //           }
-          //           done();
-          //         });
-          //       }
-          //     })
-          //     .catch(e => setImmediate(() => {throw e}))
-          //   })
-          // });
-        }
-      });
-    });
-  }
-}
+          // for each board:
+          // get all the moveCardFromBoard actions from Trello
+          oauth.getProtectedResource("https://api.trello.com/1/boards/" 
+          + boards[i].id + "/actions?limit=1000&filter=moveCardFromBoard", 
+          "GET", accessToken, accessTokenSecret, function(error, data, response){
+            var actions = JSON.parse(data);
+            var action_nothing = 1;
+            // for each action that we got from Trello:
+            async.eachSeries(actions, function(action, done){
+              // create action with:
+              // listbefore, listbeforeid, boardbeforeid, boardafterid
+              pool.query("INSERT INTO Action VALUES \
+              ($1, $2, $3, $4, NULL, $5, NULL, NULL, NULL, $6, \
+              NULL, NULL, $7, $8, NULL)",
+              [action.id, action.data.card.id, action.date, 
+              'updateCard', action.data.list.name, 
+              action.data.list.id, action.data.board.id, action.data.boardTarget.id], 
+              function(err, result){
+                if(err){
+                  // console.log(err);
+                  action_nothing = 1;
+                }
+                done();
+              });
+            }) // end of for loop (async.eachSeries)
+          }); // end of moveCardFromBoard
+
+          //get all the moveCardToBoard actions from Trello
+          oauth.getProtectedResource("https://api.trello.com/1/boards/" 
+          + boards[i].id + "/actions?limit=1000&filter=moveCardToBoard", 
+          "GET", accessToken, accessTokenSecret, function(error, data, response){
+            var actions = JSON.parse(data);
+            var action_nothing = 1;
+            // for each action that we got from Trello:
+            async.eachSeries(actions, function(action, done){
+              // create action with:
+              // listafter, listafterid, boardbeforeid, boardafterid
+              pool.query("INSERT INTO Action VALUES \
+              ($1, $2, $3, $4, NULL, NULL, $5, NULL, NULL, NULL, \
+              $6, NULL, $7, $8, NULL)",
+              [action.id, action.data.card.id, action.date,
+              'updateCard', action.data.list.name, 
+              action.data.list.id, action.data.boardSource.id, action.data.board.id],
+              function(err, result){
+                if(err){
+                  // console.log(err);
+                  action_nothing=1;
+                }
+                done();
+              });
+            }) // end of for loop (async.eachSeries)
+          }); // end of moveCardToBoard
+        } // end of for each board
+      }); // end of oauth get boards
+    }); // end of oauth get access token
+  } // end of callback function
+} // end of module.exports

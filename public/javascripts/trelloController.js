@@ -13,13 +13,13 @@ angular.module('trello', [])
 	var token = urlParam("oauth_token");
 	// console.log(token);
 	
-	// Get member
+	// Get member identified with the oauth_token
 	$http.get('/trello/member/' + token)
 	.success((data) => {
 		var memberid = data[0].id;
 		//console.log(memberid);
 
-		// Get boards
+		// Get only the boards that the member has access to
 		$http.get('/trello/boards/' + memberid)
 		.success((data) => {
 			$scope.boardData = data;
@@ -34,7 +34,10 @@ angular.module('trello', [])
 		console.log('Error: ' + error);
 	});
 	
-	
+	// There is no need to limit the following queries
+	// to be only data that the member has access to, because
+	// this is done by angularjs in /views/trello.ejs
+
 	// Get open lists
 	$http.get('/trello/openlists')
 	.success((data) => {

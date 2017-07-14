@@ -45,7 +45,7 @@ client.query("INSERT INTO Card VALUES ('cardid7', 'Card8', NULL, NULL, 'false', 
 // CREATE MORE CASES FOR CLOSED CARDS
 client.query("INSERT INTO Card VALUES ('cardid9', 'Card9', NULL, NULL, 'false', 'boardid2', 'listid4', 'htttps://www.google.com', 'true', '{memberid1}')");
 client.query("INSERT INTO Card VALUES ('cardid10', 'Card10', NULL, NULL, 'false', 'boardid3', 'listid6', 'htttps://www.google.com', 'true', '{memberid1, memberid3}')");
-
+client.query("INSERT INTO Card VALUES ('cardid11', 'Card11', NULL, NULL, 'false', 'boardid3', 'listid6', 'htttps://www.google.com', 'true', '{memberid1, memberid3}')");
 
 // Actions
 
@@ -127,45 +127,20 @@ client.query("INSERT INTO Action VALUES ('actionid29', 'cardid10', '2016-01-01 0
 // moved cardid10 from listid1 to listid4 (boardid1 to boardid2)
 client.query("INSERT INTO Action VALUES ('actionid30', 'cardid10', '2016-01-05 00:00:00.000', 'updateCard', NULL, 'List A1', 'List A2', NULL, NULL, 'listid1', 'listid4', NULL, 'boardid1', 'boardid2', 'false')");
 // closed cardid10 in listid4
-const query = client.query(new pg.Query("INSERT INTO Action VALUES ('actionid31', 'cardid10', '2016-01-26 00:00:00.000', 'updateCard', NULL, NULL, NULL, 'List A2', NULL, NULL, NULL, 'listid4', NULL, NULL, 'true')"));
+client.query("INSERT INTO Action VALUES ('actionid31', 'cardid10', '2016-01-26 00:00:00.000', 'updateCard', NULL, NULL, NULL, 'List A2', NULL, NULL, NULL, 'listid4', NULL, NULL, 'true')");
+
+// Case 11: close and reopen a card
+// created cardid11 in listid1
+client.query("INSERT INTO Action VALUES ('actionid32', 'cardid11', '2016-01-01 00:00:00.000', 'createCard', 'List A1', NULL, NULL, NULL, 'listid1', NULL, NULL, NULL, NULL, NULL, 'false')");
+// moved cardid11 from listid1 to listid7 (boardid1 to boardid3)
+client.query("INSERT INTO Action VALUES ('actionid33', 'cardid11', '2016-01-05 00:00:00.000', 'updateCard', NULL, 'List A1', 'List B3', NULL, NULL, 'listid1', 'listid7', NULL, 'boardid1', 'boardid3', 'false')");
+// closed cardid11 in listid7
+client.query("INSERT INTO Action VALUES ('actionid34', 'cardid11', '2016-01-25 00:00:00.000', 'updateCard', NULL, NULL, NULL, 'List B3', NULL, NULL, NULL, 'listid7', NULL, NULL, 'true')");
+// reopened cardid11 in listid7
+client.query("INSERT INTO Action VALUES ('actionid35', 'cardid11', '2016-01-26 00:00:00.000', 'updateCard', NULL, NULL, NULL, 'List B3', NULL, NULL, NULL, 'listid7', NULL, NULL, 'false')");
+// moved cardid11 from listid7 to listid6
+const query = client.query(new pg.Query("INSERT INTO Action VALUES ('actionid36', 'cardid11', '2016-01-27 00:00:00.000', 'updateCard', NULL, 'List B3', 'List A3', NULL, NULL, 'listid7', 'listid6', NULL, NULL, NULL, 'false')"));
 
 // close psql connection
 query.on('end', () => { client.end(); });
 
-/* ====== EXPECTED RESULTS ===== */
-
-/* Board 1, List A1 (listid1) */
-// Card1: 13 days 
-// Card3: 30 days 
-// Card4: 31 days
-// Card5: 27 days
-// Card6: 30 days
-// Card7: 24 days
-// Card8: 1 day
-// Card9: 10 days
-// Cards10: 4 days
-
-/* Board 1, List B1 (listid2) */
-// Card1: 1 day
-// Card5: 7 days
-// Card7: 9 days
-// Card9: 10 days
-
-/* Board 1, List C1 (listid3) */
-// N/A
-
-/* Board 2, List A2 (listid4) */
-// Card5: 1 day
-// Card6: 1 day
-// Card7: 1 day
-// Card8: 10 days
-// Card10: 21 days
-
-/* Board 2, List B2 (listid5) */
-// Card8: 21 days
-
-/* Board 3, List A3 (listid6) */
-// Card7: 21 days
-
-/* Board 3, List B3 (listid7) */
-// N/A
