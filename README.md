@@ -20,4 +20,22 @@
    
    `npm start` to start the server
    
-   
+## Running Tests
+### Trello Tests
+The test cases in tests/trello_tests.js test to see if data is correctly calculated and displayed in the app.
+* Make sure database tables are created. Database tables for Trello data can be created by running the command 
+
+   `node models/trello.js`
+
+* Insert the data for the test cases with the command
+
+   `node tests/trello_tests.js`
+
+* Start the server with the command
+
+   `npm start`
+
+* The expected calculation results are in the file trello_tests_results.txt
+
+* Go to http://localhost:3000/trello?oauth_token=accesstoken1 to use the app with the inserted test data and compare the displayed information with the expected results.
+
