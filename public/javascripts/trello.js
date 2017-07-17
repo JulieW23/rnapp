@@ -243,7 +243,20 @@ function generateFigure(idBoard, tabName){
 
 					// store data for table
 					// for every entry in tTime/for every card
+					console.log(card_id_and_name);
+					console.log(list_actions);
 					for (m = 0; m < tTime.length; m++){
+						// if the card is in the list, set time to 0
+						// createdinlistid or listafterid
+						for (x = 0; x < card_id_and_name.length; x++){
+							if (idCard[m] == card_id_and_name[x][0] && 
+							(card_id_and_name[x][3] == 
+							list_actions[i][0].createdinlistid || 
+							card_id_and_name[x][3] == 
+							list_actions[i][0].listafterid)){
+								tTime[m] = -1;
+							}
+						}
 						// data for distribution chart
 						if (tTime[m] >= 0){
 							var hours_to_days = Math.round(tTime[m]/24);
@@ -404,10 +417,6 @@ function generateFigure(idBoard, tabName){
         					}]
     					}); // end of highcharts 
 
-    					// DISTRIBUTION TABLES FOR LISTS
-    					// console.log(distribution_data[i].slice(0, j+1));
-    					// var list_table = [];
-
     					// CALCULATE AVERAGE
     					var data_array = [];
     					for (j = 0; j < distribution_data[i].length; j++){
@@ -439,7 +448,7 @@ function generateFigure(idBoard, tabName){
     					else{
     						$('#distribution-graph' + [i]).append('<h4 style="text-align: center;">Standard Deviation: ' + standard_deviation + ' days</h4><br><br>');
     					}
-    					
+
     					// overall table
     					averages_table.push([list_names[i], average, standard_deviation]);
     					$('#overall-table').empty();
