@@ -15,9 +15,12 @@ var trello_oauth = require("./login/trello_oauth.js");
 // ***********************************
 var routes = require('./routes/index');
 var trello = require('./routes/trello');
+// var prosperworks_account = require('./routes/prosperworks_account');
+var prosperworks = require('./routes/prosperworks');
 
 var app = express();
 
+// =================================================================
 // trello login routes
 app.get("/trelloLogin", function(request, response) {
   console.log('GET trelloLogin');
@@ -49,6 +52,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ***********************************
 app.use('/', routes);
 app.use('/trello', trello);
+// app.use('/prosperworks_account', prosperworks_account);
+app.use('/prosperworks', prosperworks);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

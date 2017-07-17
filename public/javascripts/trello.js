@@ -243,8 +243,8 @@ function generateFigure(idBoard, tabName){
 
 					// store data for table
 					// for every entry in tTime/for every card
-					console.log(card_id_and_name);
-					console.log(list_actions);
+					// console.log(card_id_and_name);
+					// console.log(list_actions);
 					for (m = 0; m < tTime.length; m++){
 						// if the card is in the list, set time to 0
 						// createdinlistid or listafterid
@@ -335,10 +335,10 @@ function generateFigure(idBoard, tabName){
 					// Create array for the overall table, 
 					// and insert the first row of the table
 					var averages_table = [['<b>List</b>', '<b>Average (Days)</b>', 
-					'<b>Standard Deviation (Days)</b>']];
+					'<b>Standard Deviation (Days)</b>', '<b>Minimum Days</b>', '<b>Maximum Days</b>']];
 
 					// console.log(list_names);
-					// console.log(distribution_data);
+					console.log(distribution_data);
 					// console.log(card_id_and_name);
 					for (i = 0; i < list_names.length; i++){
 						// go through distribution_data and replace card ids with card names
@@ -356,9 +356,9 @@ function generateFigure(idBoard, tabName){
     						}
     					}
     					// get rid of all empty columns only at the end of the chart
-    					var j=distribution_data[i].length -1;
-						while (j >= 0 && distribution_data[i][j].y == 0){
-							j--;
+    					var last_useful=distribution_data[i].length -1;
+						while (last_useful >= 0 && distribution_data[i][last_useful].y == 0){
+							last_useful--;
 						}
 						$('#distribution-graph').append("<div id='distribution-graph" + [i] 
     						+ "'></div>");
@@ -413,7 +413,7 @@ function generateFigure(idBoard, tabName){
         					series: [{
         						showInLegend: false,
             					name: ' ',
-            					data: distribution_data[i].slice(0, j+1)
+            					data: distribution_data[i].slice(0, last_useful+1)
         					}]
     					}); // end of highcharts 
 
@@ -448,9 +448,17 @@ function generateFigure(idBoard, tabName){
     					else{
     						$('#distribution-graph' + [i]).append('<h4 style="text-align: center;">Standard Deviation: ' + standard_deviation + ' days</h4><br><br>');
     					}
-
+    					// find minimum number of days
+    					var min_days;
+    					for (z = 0; z < distribution_data[i].length; z++){
+    						if(distribution_data[i][z].y != 0){
+    							min_days = z;
+    							break;
+    						}
+    					}
+    					// max number of days = last_useful (from above, when fixing graph x axis)
     					// overall table
-    					averages_table.push([list_names[i], average, standard_deviation]);
+    					averages_table.push([list_names[i], average, standard_deviation, min_days, last_useful]);
     					$('#overall-table').empty();
     					$('#overall-table').append("<h4>Average and Standard Deviation for the Number of Days Cards Spend in Each List:</h4>");
     					var result = "<table>";
