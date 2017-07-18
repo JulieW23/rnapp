@@ -10,14 +10,14 @@ client.connect();
 // Create PWAccount table (an account can have multiple users)
 client.query(
 	'CREATE TABLE PWAccount(\
-	id integer PRIMARY KEY, \
+	id varchar(50) PRIMARY KEY, \
 	name varchar(100) NOT NULL)'
 );
 
 // Create PWMember table
 client.query(
 	'CREATE TABLE PWMember(\
-	id integer PRIMARY KEY, \
+	id varchar(50) PRIMARY KEY, \
 	name varchar(100) NOT NULL, \
 	email varchar(200))'
 );
@@ -25,7 +25,7 @@ client.query(
 // Create Company table
 client.query(
 	'CREATE TABLE Company(\
-	id integer PRIMARY KEY, \
+	id varchar(50) PRIMARY KEY, \
 	name varchar(100) NOT NULL, \
 	address varchar(500), \
 	details varchar(1500))'
@@ -34,17 +34,17 @@ client.query(
 // Create Pipeline table
 client.query(
 	'CREATE TABLE Pipeline(\
-	id integer PRIMARY KEY, \
+	id varchar(50) PRIMARY KEY, \
 	name varchar(100) NOT NULL, \
-	stages integer[])' // stages stores PipelineStage id
+	stages text[])' // stages stores PipelineStage id
 );
 
 // Create PipelineStage table
 client.query(
 	'CREATE TABLE PipelineStage(\
-	id integer PRIMARY KEY, \
+	id varchar(50) PRIMARY KEY, \
 	name varchar(100) NOT NULL, \
-	pipeline_id integer NOT NULL REFERENCES Pipeline(id), \
+	pipeline_id varchar(50) NOT NULL REFERENCES Pipeline(id), \
 	win_probability integer)'
 );
 
@@ -63,24 +63,24 @@ client.query(
 // Create LossReason table
 client.query(
 	'CREATE TABLE LossReason(\
-	id integer PRIMARY KEY, \
+	id varchar(50) PRIMARY KEY, \
 	name varchar(100) NOT NULL)'
 );
 
 // Create Opportunity table
 client.query(
 	'CREATE TABLE Opportunity(\
-	id integer PRIMARY KEY, \
+	id varchar(50) PRIMARY KEY, \
 	name varchar(100) NOT NULL, \
-	assignee_id integer, \
-	company_id integer, \
+	assignee_id varchar(50) REFERENCES PWMember(id), \
+	company_id varchar(50), \
 	company_name varchar(100), \
 	details varchar(1000), \
-	loss_reason_id integer, \
-	monetary_value integer, \
-	pipeline_id integer, \
+	loss_reason_id varchar(50) REFERENCES LossReason(id), \
+	monetary_value varchar(50), \
+	pipeline_id varchar(50) REFERENCES Pipeline(id), \
 	priority priority_type, \
-	pipeline_stage_id integer, \
+	pipeline_stage_id varchar(50) REFERENCES PipelineStage(id), \
 	status status_type, \
 	win_probability integer, \
 	date_created timestamp)'
@@ -92,15 +92,29 @@ client.query(
 	('opportunity')"
 );
 
+// Create pw_action_type
+client.query(
+	"CREATE TYPE pw_action_type AS ENUM \
+	('Stage Change', 'Created', 'Status Change')"
+);
+
 // Create PWAction table
 const query = client.query(new pg.Query(
 	'CREATE TABLE PWAction(\
-	id integer PRIMARY KEY, \
-	type varchar(100), \
+	id varchar(50) PRIMARY KEY, \
+	type pw_action_type, \
+	opportunity_id varchar(50), \
 	parent_resource parent_resource_type, \
 	date timestamp, \
-	stageBefore integer, \
-	stageAfter integer)'
+	stageCreated varchar(100), \
+	stageBefore varchar(100), \
+	stageAfter varchar(100), \
+	stageClosed varchar(100), \
+	stageCreatedId varchar(50), \
+	stageBeforeId varchar(50), \
+	stageAfterId varchar(50), \
+	stageClosedId varchar(50), \
+	closedStatus status_type)'
 ));
 
 query.on('end', () => { client.end(); });
