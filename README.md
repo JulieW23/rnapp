@@ -16,7 +16,9 @@
 
    `npm install` to install dependencies, then 
    
-   `node /models/trello.js` to create the database tables, then
+   `node /models/trello.js` to create the Trello database tables, then
+   
+   `node /models/prosperworks.js` to create the Prosperworks database tables, then
    
    `npm start` to start the server
    

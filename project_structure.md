@@ -9,7 +9,9 @@
 
    This directory contains all the code to create database tables.
    
-   /models/trello.js - creates database tables to store data from trello.
+   /models/trello.js - creates database tables to store data from Trello.
+   
+   /models/prosperworks.js - creates database tables to store data from ProsperWorks.
    
 ## /public
 
@@ -18,6 +20,12 @@
    /public/javascripts/trello.js - main javascript for the Trello report page.
    
    /public/javascripts/trelloController.js - AngularJS controller for the Trello report page.
+   
+   /public/javascripts/prosperworks.js - main javascript for the ProsperWorks page.
+   
+   /public/javascripts/prosperworksController.js - AngularJS controller for the ProsperWorks page.
+   
+   /public/javascripts/shared_scripts.js - shared javascript for the Trello report page and the ProsperWorks page.
    
    /public/stylesheets/style.css - general styling for the app.
    
@@ -31,21 +39,27 @@
    
    /views/trello.ejs - Trello report page
    
+   /views/prosperworks.ejs - ProsperWorks page
+   
    /views/error.ejs - error page
    
 ## /routes
 
    This directory contains all the defined endpoints for database queries and routes for the app.
    
-   /routes/index.js - renders the home page
+   /routes/index.js - renders the home page.
    
    /routes/trello.js - renders the Trello report page, and also defines endpoints for database queries for Trello data.
+   
+   /routes/prosperworks.js - renders the Prosperworks page, and also defines endpoints for database queries for ProsperWorks data.
    
 ## /login
 
    This directory contains all the login handling, and code for populating the database.
    
    /login/trello_oauth.js - contains code for Trello login and putting data from Trello into the app's database.
+   
+   /login/prosperworks.js - contains code for putting data from ProsperWorks into the app's database.
    
 ## /tests
    This directory contains tests for the app.
