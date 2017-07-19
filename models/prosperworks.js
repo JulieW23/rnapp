@@ -114,7 +114,8 @@ const query = client.query(new pg.Query(
 	stageBeforeId varchar(50), \
 	stageAfterId varchar(50), \
 	stageClosedId varchar(50), \
-	closedStatus status_type)'
+	closedStatus status_type, \
+	closed boolean)'
 ));
 
 query.on('end', () => { client.end(); });

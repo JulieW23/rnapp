@@ -1,0 +1,8 @@
+body {
+	min-width: 765px;
+}
+
+#reload-button {
+	float: right;
+	margin-bottom: 3px;
+}

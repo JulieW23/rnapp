@@ -45,7 +45,8 @@ var post_options = {
 
 // stores pipeline stages, called by storeData()
 function storePipelineStages(){
-	options.url = 'https://api.prosperworks.com/developer_api/v1/pipeline_stages';
+	options.url = 
+	'https://api.prosperworks.com/developer_api/v1/pipeline_stages';
 	request(options, function(error, response, body){
 		if(!error && response.statusCode == 200){
 			var stages = JSON.parse(body);
@@ -69,7 +70,8 @@ function storePipelineStages(){
 
 // stores loss reason, called by storePipelineStages()
 function storeLossReason(){
-	options.url = 'https://api.prosperworks.com/developer_api/v1/loss_reasons';
+	options.url = 
+	'https://api.prosperworks.com/developer_api/v1/loss_reasons';
 	request(options, function(error, response, body){
 		if(!error && response.statusCode == 200){
 			var reasons = JSON.parse(body);
@@ -102,11 +104,12 @@ function storeOpportunities(){
 				pool.query("INSERT INTO Opportunity VALUES \
 				($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)",
 				[opportunity.id, opportunity.name, opportunity.assignee_id, 
-				opportunity.company_id, opportunity.company_name, opportunity.details, 
-				opportunity.loss_reason_id, opportunity.monetary_value, 
-				opportunity.pipeline_id, opportunity.priority, 
-				opportunity.pipeline_stage_id,opportunity.status, 
-				opportunity.win_probability, date_created], function(err, result){
+				opportunity.company_id, opportunity.company_name, 
+				opportunity.details, opportunity.loss_reason_id, 
+				opportunity.monetary_value, opportunity.pipeline_id, 
+				opportunity.priority, opportunity.pipeline_stage_id, 
+				opportunity.status, opportunity.win_probability, date_created], 
+				function(err, result){
 					if(err){
 						//console.log("error: " + err);
 						nothing = 1;
@@ -114,9 +117,10 @@ function storeOpportunities(){
 					// store an incomplete created opportunity action
 					var created_act_id = 'c' + opportunity.id;
 					pool.query("INSERT INTO PWAction VALUES \
-					($1, $2, $3, $4, $5, NULL, NULL, NULL, NULL, NULL, NULL, NULL, \
-					NULL, NULL)", [created_act_id, 'Created', opportunity.id, 
-					'opportunity', date_created], function(err, result){
+					($1, $2, $3, $4, $5, NULL, NULL, NULL, NULL, NULL, \
+					NULL, NULL, NULL, NULL, NULL)", [created_act_id, 
+					'Created', opportunity.id, 'opportunity', date_created], 
+					function(err, result){
 						if(err){
 							//console.log("error: " + err);
 							nothing = 1;
@@ -126,7 +130,7 @@ function storeOpportunities(){
 				});
 			}, function(err){
 				// getActivityTypes();
-				getWantedActivityTypes();
+				//getWantedActivityTypes();
 			});
 		}
 	});
@@ -134,7 +138,8 @@ function storeOpportunities(){
 
 // testing helper to get activity types, called by storeOpportunities()
 function getActivityTypes(){
-	options.url = 'https://api.prosperworks.com/developer_api/v1/activity_types';
+	options.url = 
+	'https://api.prosperworks.com/developer_api/v1/activity_types';
 	request(options, function(error, response, body){
 		if(!error && response.statusCode == 200){
 			var types = JSON.parse(body);
@@ -156,7 +161,8 @@ var wanted = {
 // get wanted activity types, called by storeOpportunities()
 function getWantedActivityTypes(){
 	// get all activity types in account
-	options.url = 'https://api.prosperworks.com/developer_api/v1/activity_types';
+	options.url = 
+	'https://api.prosperworks.com/developer_api/v1/activity_types';
 	request(options, function(error, response, body){
 		if(!error && response.statusCode == 200){
 			var types = JSON.parse(body);
@@ -223,12 +229,79 @@ function storePWActivities(){
 				var activity_date = 
 				new Date(activity.activity_date * 1000).toISOString();
 				if (activity.type.name == "Stage Change"){
-					pool.query("INSERT INTO PWAction VALUES \
-					($1, $2, $3, $4, $5, NULL, $6, $7, NULL, NULL, $8, $9, NULL, NULL)", 
+					pool.query("INSERT INTO PWAction VALUES \ 
+					($1, $2, $3, $4, $5, NULL, $6, $7, NULL, NULL, \
+					$8, $9, NULL, NULL, NULL)", 
 					[activity.id, activity.type.name, activity.parent.id, 
 					activity.parent.type, activity_date, activity.old_value.name, 
 					activity.new_value.name, activity.old_value.id, 
 					activity.new_value.id], function(err, result){
+						if(err){
+							//console.log("error: " + err);
+							done();
+						}
+						else{
+							// check if this is the first time that the opportunity moved
+							pool.query("SELECT * FROM PWAction WHERE \
+							opportunity_id=($1) order by date", 
+							[activity.parent.id], function(err, result){
+								if(err){
+									//console.log("error: " + err);
+									nothing = 1;
+								}
+								// if it is the first time that this opportunity moved
+								if (result.rows.length == 2 && 
+								result.rows[0].type == 'Created'){
+									// we can now deduce which stage the opportunity
+									// was created in, so we can complete the 'Created' 
+									// action for this opportunity
+									pool.query("UPDATE PWAction SET \
+									stagecreated=($1), stagecreatedid=($2) \
+									where opportunity_id=($3) and \
+									type='Created'", [activity.old_value.name, 
+									activity.old_value.id, activity.parent.id], 
+									function(err, result){
+										if(err){
+											//console.log("error: " + err);
+											nothing = 1;
+										}
+										done();
+									});
+								}
+								else{
+									done();
+								}
+							}); // end of select query
+						}
+					}); // end of insert action query
+				}
+				// NEED TO KEEP RECORD OF ALL STATUS CHANGES
+				// BUT THIS WILL AFFECT THE ASSUMPTION THAT ROWS ARE ALWAYS
+				// ALTERNATING BETWEEN ENTERING AND EXITING IN THE
+				// DATA CALCULATION SECTION
+				
+				else if (activity.type.name == 'Status Change'){
+					var query_statement;
+					var query_array = [activity.id, activity.type.name, 
+					activity.parent.id, activity.parent.type, activity_date, 
+					activity.new_value];
+					if (activity.old_value == 'Open' || activity.new_value == 'Open'){
+						query_statement = 'INSERT INTO PWAction VALUES \
+						($1, $2, $3, $4, $5, NULL, NULL, NULL, NULL, NULL, \
+						NULL, NULL, NULL, $6, $7)';
+						if (activity.old_value == 'Open'){
+							query_array.push('t');
+						}
+						else{
+							query_array.push('f');
+						}
+					}
+					else{
+						query_statement = 'INSERT INTO PWAction VALUES \
+						($1, $2, $3, $4, $5, NULL, NULL, NULL, NULL, NULL, \
+						NULL, NULL, NULL, $6, NULL)';
+					}
+					pool.query(query_statement, query_array, function(err, result){
 						if(err){
 							//console.log("error: " + err);
 							done();
@@ -265,54 +338,7 @@ function storePWActivities(){
 							}); // end of select query
 						}
 					}); // end of insert action query
-				}
-				// NEED TO KEEP RECORD OF ALL STATUS CHANGES
-				// BUT THIS WILL AFFECT THE ASSUMPTION THAT ROWS ARE ALWAYS
-				// ALTERNATING BETWEEN ENTERING AND EXITING IN THE
-				// DATA CALCULATION SECTION
-				
-				// else if (activity.type.name == 'Status Change'){
-				// 	pool.query("INSERT INTO PWAction VALUES \
-				// 	($1, $2, $3, $4, $5, NULL, NULL, NULL, $6, NULL, NULL, NULL, $7, $8)", 
-				// 	[activity.id, activity.type.name, activity.parent.id, 
-				// 	activity.parent.type, activity_date, ??????], function(err, result){
-				// 		if(err){
-				// 			//console.log("error: " + err);
-				// 			done();
-				// 		}
-				// 		else{
-				// 			// check if this is the first time that the opportunity moved
-				// 			pool.query("SELECT * FROM PWAction WHERE \
-				// 			opportunity_id=($1) order by date", 
-				// 			[activity.parent.id], function(err, result){
-				// 				if(err){
-				// 					//console.log("error: " + err);
-				// 					nothing = 1;
-				// 				}
-				// 				// if it is the first time that this opportunity moved
-				// 				if (result.rows.length == 2 && result.rows[0].type == 'Created'){
-				// 					// we can now deduce which stage the opportunity
-				// 					// was created in, so we can complete the 'Created' 
-				// 					// action for this opportunity
-				// 					pool.query("UPDATE PWAction SET stagecreated=($1), \
-				// 					stagecreatedid=($2) where opportunity_id=($3) \
-				// 					and type='Created'", [activity.old_value.name, 
-				// 					activity.old_value.id, activity.parent.id], 
-				// 					function(err, result){
-				// 						if(err){
-				// 							//console.log("error: " + err);
-				// 							nothing = 1;
-				// 						}
-				// 						done();
-				// 					});
-				// 				}
-				// 				else{
-				// 					done();
-				// 				}
-				// 			}); // end of select query
-				// 		}
-				// 	}); // end of insert action query
-				// } // end of else if
+				} // end of else if
 				else{
 					done();
 				}
