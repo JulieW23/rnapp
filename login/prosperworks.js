@@ -17,7 +17,8 @@ var pool = new pg.Pool({
   host: config.databaseHost
 });
 
-// CAN HAVE JUST ONE SET OF OPTIONS, JUST CHANGE METHOD TO 'GET'/'POST' WHEN USING IT
+// CAN HAVE JUST ONE SET OF OPTIONS
+// JUST CHANGE METHOD TO 'GET'/'POST' WHEN USING IT
 
 // GET options
 var options = {
@@ -53,10 +54,20 @@ function storePipelineStages(){
 			//console.log(stages);
 			async.eachSeries(stages, function(stage, done){
 				pool.query("INSERT INTO PipelineStage VALUES ($1, $2, $3, $4)",
-				[stage.id, stage.name, stage.pipeline_id, stage.win_probability], 
-				function(err, result){
+				[stage.id, stage.name, stage.pipeline_id, 
+				stage.win_probability], function(err, result){
 					if(err){
-						//conosle.log("error: " + err);
+						if (err = 'error: duplicate key value violates \
+						unique constraint "pipelinestage_pkey"'){
+							pool.query("UPDATE PipelineStage SET name($1), \
+							pipeline_id=($2), win_probability=($3) WHERE \
+							id=($4)", [stage.name, stage.pipeline_id, 
+							stage.win_probability, stage.id], 
+							function(err, result){
+								if(err){ nothing = 1; }
+							});
+						}
+						//console.log("error: " + err);
 						nothing = 1;
 					}
 					done();
@@ -70,8 +81,7 @@ function storePipelineStages(){
 
 // stores loss reason, called by storePipelineStages()
 function storeLossReason(){
-	options.url = 
-	'https://api.prosperworks.com/developer_api/v1/loss_reasons';
+	options.url = 'https://api.prosperworks.com/developer_api/v1/loss_reasons';
 	request(options, function(error, response, body){
 		if(!error && response.statusCode == 200){
 			var reasons = JSON.parse(body);
@@ -79,6 +89,14 @@ function storeLossReason(){
 				pool.query("INSERT INTO LossReason VALUES ($1, $2)", 
 				[reason.id, reason.name], function(err, result){
 					if(err){
+						if (err = 'error: duplicate key value violates \
+						unique constraint "lossreason_pkey"'){
+							pool.query("UPDATE LossReason SET name=($1) \
+							WHERE id=($2)", [reason.name, reason.id], 
+							function(err, result){
+								if(err){ nothing = 1; }
+							});
+						}
 						//console.log("error: " + err);
 						nothing = 1;
 					}
@@ -111,6 +129,26 @@ function storeOpportunities(){
 				opportunity.status, opportunity.win_probability, date_created], 
 				function(err, result){
 					if(err){
+						if (err = 'error: duplicate key value violates \
+						unique constraint "opportunity_pkey"'){
+							pool.query("UPDATE Opportunity SET name=($1), \
+							assignee_id=($2), company_id=($3), \
+							company_name=($4), details=($5), \
+							loss_reason_id=($6), monetary_value=($7), \
+							pipeline_id=($8), priority=($9), \
+							pipeline_stage_id=($10), status=($11), \
+							win_probability=($12) WHERE id=($13)", 
+							[opportunity.name, opportunity.assignee_id, 
+							opportunity.company_id, opportunity.company_name, 
+							opportunity.details, opportunity.loss_reason_id, 
+							opportunity.monetary_value, 
+							opportunity.pipeline_id, opportunity.priority, 
+							opportunity.pipeline_stage_id, opportunity.status, 
+							opportunity.win_probability, opportunity.id], 
+							function(err, result){
+								if(err){ nothing = 1; }
+							});
+						}
 						//console.log("error: " + err);
 						nothing = 1;
 					}
@@ -130,7 +168,7 @@ function storeOpportunities(){
 				});
 			}, function(err){
 				// getActivityTypes();
-				//getWantedActivityTypes();
+				getWantedActivityTypes();
 			});
 		}
 	});
@@ -229,50 +267,20 @@ function storePWActivities(){
 				var activity_date = 
 				new Date(activity.activity_date * 1000).toISOString();
 				if (activity.type.name == "Stage Change"){
-					pool.query("INSERT INTO PWAction VALUES \ 
+					pool.query("INSERT INTO PWAction VALUES \
 					($1, $2, $3, $4, $5, NULL, $6, $7, NULL, NULL, \
 					$8, $9, NULL, NULL, NULL)", 
 					[activity.id, activity.type.name, activity.parent.id, 
-					activity.parent.type, activity_date, activity.old_value.name, 
-					activity.new_value.name, activity.old_value.id, 
-					activity.new_value.id], function(err, result){
+					activity.parent.type, activity_date, 
+					activity.old_value.name, activity.new_value.name, 
+					activity.old_value.id, activity.new_value.id], 
+					function(err, result){
 						if(err){
 							//console.log("error: " + err);
-							done();
+							//done();
+							nothing = 1;
 						}
-						else{
-							// check if this is the first time that the opportunity moved
-							pool.query("SELECT * FROM PWAction WHERE \
-							opportunity_id=($1) order by date", 
-							[activity.parent.id], function(err, result){
-								if(err){
-									//console.log("error: " + err);
-									nothing = 1;
-								}
-								// if it is the first time that this opportunity moved
-								if (result.rows.length == 2 && 
-								result.rows[0].type == 'Created'){
-									// we can now deduce which stage the opportunity
-									// was created in, so we can complete the 'Created' 
-									// action for this opportunity
-									pool.query("UPDATE PWAction SET \
-									stagecreated=($1), stagecreatedid=($2) \
-									where opportunity_id=($3) and \
-									type='Created'", [activity.old_value.name, 
-									activity.old_value.id, activity.parent.id], 
-									function(err, result){
-										if(err){
-											//console.log("error: " + err);
-											nothing = 1;
-										}
-										done();
-									});
-								}
-								else{
-									done();
-								}
-							}); // end of select query
-						}
+						done();
 					}); // end of insert action query
 				}
 				// NEED TO KEEP RECORD OF ALL STATUS CHANGES
@@ -285,7 +293,8 @@ function storePWActivities(){
 					var query_array = [activity.id, activity.type.name, 
 					activity.parent.id, activity.parent.type, activity_date, 
 					activity.new_value];
-					if (activity.old_value == 'Open' || activity.new_value == 'Open'){
+					if (activity.old_value == 'Open' || 
+					activity.new_value == 'Open'){
 						query_statement = 'INSERT INTO PWAction VALUES \
 						($1, $2, $3, $4, $5, NULL, NULL, NULL, NULL, NULL, \
 						NULL, NULL, NULL, $6, $7)';
@@ -301,58 +310,137 @@ function storePWActivities(){
 						($1, $2, $3, $4, $5, NULL, NULL, NULL, NULL, NULL, \
 						NULL, NULL, NULL, $6, NULL)';
 					}
-					pool.query(query_statement, query_array, function(err, result){
+					pool.query(query_statement, query_array, 
+					function(err, result){
 						if(err){
 							//console.log("error: " + err);
-							done();
+							///done();
+							nothing = 1;
 						}
-						else{
-							// check if this is the first time that the opportunity moved
-							pool.query("SELECT * FROM PWAction WHERE \
-							opportunity_id=($1) order by date", 
-							[activity.parent.id], function(err, result){
-								if(err){
-									//console.log("error: " + err);
-									nothing = 1;
-								}
-								// if it is the first time that this opportunity moved
-								if (result.rows.length == 2 && result.rows[0].type == 'Created'){
-									// we can now deduce which stage the opportunity
-									// was created in, so we can complete the 'Created' 
-									// action for this opportunity
-									pool.query("UPDATE PWAction SET stagecreated=($1), \
-									stagecreatedid=($2) where opportunity_id=($3) \
-									and type='Created'", [activity.old_value.name, 
-									activity.old_value.id, activity.parent.id], 
-									function(err, result){
-										if(err){
-											//console.log("error: " + err);
-											nothing = 1;
-										}
-										done();
-									});
-								}
-								else{
-									done();
-								}
-							}); // end of select query
-						}
+						done();
 					}); // end of insert action query
 				} // end of else if
 				else{
 					done();
 				}
+			}, function(err){
+				completeActivities();
 			}); // end of async.eachSeries
 		} // end of if request for prosperworks activities is successful
 	}); // end of get activity request
 } // end of storePWActivities()
 
+// completes activities that are missing pipeline_stage_id
+// called by storePSActivities()
+function completeActivities(){
+	// get all opportunities from database
+	pool.query("SELECT id, pipeline_stage_id FROM Opportunity", 
+	function(err, result){
+		// for each opportunity
+		async.eachSeries(result.rows, function(opportunity, done){
+			// get all the actions for this opportunity
+			pool.query("SELECT * FROM PWAction WHERE opportunity_id=($1) \
+			order by date", [opportunity.id], function(err, result1){
+				if(err){
+					nothing=1;
+				}
+				// get the index of the first movement, if there is one
+				var i = 0;
+				while(i < result1.rows.length && 
+				(result1.rows[i].type == 'Created' || 
+				result1.rows[i].type == 'Status Change')){
+					i++;
+				}
+				// CASE 1: this opportunity never moves
+				// approach: use the current stage of the opportunity
+				if (i == result1.rows.length){
+					// for each action of this opportunity
+					async.eachSeries(result1.rows, function(action, done1){
+						// get the name of the current stage of the opportunity
+						pool.query("SELECT name FROM PipelineStage \
+						WHERE id=($1)", [opportunity.pipeline_stage_id], 
+						function(err, result2){
+							if(err){
+								nothing = 1;
+							}
+							// if the action is creating the opportunity
+							// fill in stagecreatedid with current stage id and
+							// stagecreated with current stage name
+							if (action.type == 'Created'){
+								pool.query("UPDATE PWAction SET \
+								stagecreatedid=($1), stagecreated=($2) \
+								WHERE id=($3)", 
+								[opportunity.pipeline_stage_id, 
+								result2.rows[0].name, action.id], 
+								function(err, result3){
+									if (err){
+										nothing = 1;
+									}
+									done1();
+								});
+							}
+							// if action is closing or reopening opportunity,
+							// fill in stageclosedid with current stage id and
+							// stageclosed with current stage name
+							else if (action.type == 'Status Change'){
+								pool.query("UPDATE PWAction SET \
+								stageclosedid=($1), stageclosed=($2) \
+								WHERE id=($3)", 
+								[opportunity.pipeline_stage_id, 
+								result2.rows[0].name, action.id], 
+								function(err, result2){
+									if(err){
+										console.log('Error: ' + err);
+										nothing = 1;
+									}
+									done1();
+								});
+							}
+						})
+					});
+				} // end of case 1
+				// CASE 2:
+				// if there are movements
+				else{
+					async.eachSeries(result1.rows.slice(0, i), 
+					function(action, done1){
+						if(action.type == 'Created'){
+							pool.query("UPDATE PWAction SET \
+							stagecreatedid=($1) WHERE id=($2)", 
+							[result1.rows[i].stagebeforeid, action.id], 
+							function(err, result2){
+								if(err){
+									nothing = 1;
+								}
+								done1();
+							});
+						}
+						else if(action.type == 'Status Change'){
+							pool.query("Update PWAction SET \
+							stageclosedid=($1) WHERE id=($2)", 
+							[result1.rows[i].stagebeforeid, action.id], 
+							function(err, result2){
+								if(err){
+									nothing = 1;
+								}
+								done1();
+							});
+						}
+					});
+				} // end of case2
+				done();
+			}); // end of select actions for an opportunity
+		}); // end of for each opportunity
+	}); // end of select all opportunities
+} // end of completeActivities()
+
 
 module.exports = {
-	// function that stores account, members, companies and pipelines asynchronously,
-	// and then calls other functions to store other data in a specific order
-	// (because of database table definitions, some columns of later tables reference 
-	// previous table columns, so the previous table's data must be stored first)
+	// function that stores account, members, companies and pipelines 
+	// asynchronously,and then calls other functions to store other data in a 
+	// specific order (because of database table definitions, some columns of 
+	// later tables reference previous table columns, so the previous table's 
+	// data must be stored first)
 	storeData: function(){
 		// store account
 		options.url = 'https://api.prosperworks.com/developer_api/v1/account';
@@ -363,10 +451,17 @@ module.exports = {
 				pool.query("INSERT INTO PWAccount VALUES ($1, $2)", 
           		[account.id, account.name], function(err, result){
             		if(err){
+            			// if record already exists ,update it
+            			if (err = 'error: duplicate key value violates unique \
+            			constraint "pwaccount_pkey"'){
+            				pool.query("UPDATE PWAccount SET name=($1)", 
+            				[account.name], function(err, result){
+            					if(err){ nothing = 1; }
+            				});
+            			}
               			//console.log("error: " + err);
               			nothing = 1;
             		}
-            		// storeMembers();
           		});
 			}
 		});
@@ -380,6 +475,16 @@ module.exports = {
 					pool.query("INSERT INTO PWMember VALUES ($1, $2, $3)", 
 					[user.id, user.name, user.email], function(err, result){
 						if(err){
+							// update
+							if (err = 'error: duplicate key value violates \
+							unique constraint "pwmember_pkey"'){
+								pool.query("UPDATE PWMember SET name=($1), \
+								email=($2) WHERE id=($3)", 
+								[user.name, user.email, user.id], 
+								function(err, result){
+									if(err){ nothing = 1; }
+								});
+							}
 							//console.log("error: " + err);
               				nothing = 1;
 						}
@@ -397,14 +502,24 @@ module.exports = {
 				//console.log(companies);
 				async.eachSeries(companies, function(company, done){
 					//console.log(company);
-					var address = company.address.street + ", " + company.address.city 
-					+ ", " + company.address.state + ", " + company.address. country 
-					+ ", " + company.address.postal_code;
+					var address = company.address.street + ", " 
+					+ company.address.city + ", " + company.address.state 
+					+ ", " + company.address. country + ", " 
+					+ company.address.postal_code;
 					pool.query("INSERT INTO Company VALUES ($1, $2, $3, $4)", 
 					[company.id, company.name, address, company.details], 
 					function(err, result){
 						if(err){
-							// console.log("error: " + err);
+							if (err = 'error: duplicate key value violates \
+							unique constraint "company_pkey"'){
+								pool.query("UPDATE Company SET name=($1), \
+								address=($2), details=($3) WHERE id=($4)", 
+								[company.name, address, company.details, 
+								company.id], function(err, result){
+									if(err){ nothing = 1; }
+								});
+							}
+							//console.log("error: " + err);
 							nothing = 1;
 						}
 						done();
@@ -413,7 +528,8 @@ module.exports = {
 			}
 		});
 		// store pipelines
-		options.url = 'https://api.prosperworks.com/developer_api/v1/pipelines';
+		options.url = 
+		'https://api.prosperworks.com/developer_api/v1/pipelines';
 		request(options, function(error, response, body){
 			if(!error && response.statusCode == 200){
 				var pipelines = JSON.parse(body);
@@ -428,6 +544,15 @@ module.exports = {
 					[pipeline.id, pipeline.name, pipeline_stages], 
 					function(err, result){
 						if(err){
+							if (err = 'error: duplicate key value violates \
+							unique constraint "pipeline_pkey"'){
+								pool.query("UPDATE Pipeline SET name=($1), \
+								stages=($2) WHERE id=($3)", [pipeline.name, 
+								pipeline_stages, pipeline.id], 
+								function(err, result){
+									if(err){ nothing = 1; }
+								});
+							}
 							//console.log("error: " + err);
 							nothing = 1;
 						}

@@ -1,11 +1,13 @@
 // Get oauth_token from url
 urlParam = function(name){
-	var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+	var results = 
+	new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
 	return results[1] || 0;
 }
 
 
-// Handle board selection: show hidden elements & retrieve list data fromt Trello
+// Handle board selection: 
+// show hidden elements & retrieve list data fromt Trello
 function boardSelected(boardID) {
 	// show elements
 	document.getElementById('hidden_table1').style.display="block";
@@ -29,12 +31,14 @@ function generateFigure(idBoard, tabName){
 	var toDate;
 	if (tabName == 'distribution-table'){
 		// if date(s) not selected
-		if (!document.getElementById("tableFromDate").value || !document.getElementById("tableToDate").value){
+		if (!document.getElementById("tableFromDate").value || 
+		!document.getElementById("tableToDate").value){
 			alert("Date range is not selected.");
 			return;
 		}
 		// if from date is after to date
-		else if (document.getElementById("tableFromDate").value > document.getElementById("tableToDate").value){
+		else if (document.getElementById("tableFromDate").value > 
+		document.getElementById("tableToDate").value){
 			alert("'From' date needs to be before 'To' date,");
 			return;
 		}
@@ -45,11 +49,13 @@ function generateFigure(idBoard, tabName){
 		}
 	}
 	else if (tabName == 'distribution-graph-tab') {
-		if (!document.getElementById("distributionFromDate").value || !document.getElementById("distributionToDate").value){
+		if (!document.getElementById("distributionFromDate").value || 
+		!document.getElementById("distributionToDate").value){
 			alert("Date range is not selected.");
 			return;
 		}
-		else if (document.getElementById("distributionFromDate").value > document.getElementById("distributionToDate").value){
+		else if (document.getElementById("distributionFromDate").value > 
+		document.getElementById("distributionToDate").value){
 			alert("'From' date needs to be before 'To' date,");
 			return;
 		}
@@ -59,11 +65,13 @@ function generateFigure(idBoard, tabName){
 		}
 	}
 	else if (tabName == 'list-graph-tab') {
-		if (!document.getElementById("listFromDate").value || !document.getElementById("listToDate").value){
+		if (!document.getElementById("listFromDate").value || 
+		!document.getElementById("listToDate").value){
 			alert("Date range is not selected.");
 			return;
 		}
-		else if (document.getElementById("listFromDate").value > document.getElementById("listToDate").value){
+		else if (document.getElementById("listFromDate").value > 
+		document.getElementById("listToDate").value){
 			alert("'From' date needs to be before 'To' date,");
 			return;
 		}
@@ -88,7 +96,8 @@ function generateFigure(idBoard, tabName){
 	var cards;
 	// the distribution table as a 2d array
 	var table_cells = [['idCard', 'shorturl', 'Card']];
-	// array that stores card id + name + shorturl so that they can be matched (for distribution charts)
+	// array that stores card id + name + shorturl so that they can be 
+	//matched (for distribution charts)
 	// [card.id, card.name, card.shorturl, card.idlist]
 	var card_id_and_name = [];
 	// get cards for this board
@@ -148,11 +157,12 @@ function generateFigure(idBoard, tabName){
 					// id of card (same order as tTime)
 					var idCard = [];
 					var k = 0;
-					// Initial time is negative (=-1) to ensure that cards that do not 
-					// exist within the time range will not be counted in charts/tables.
-					// When the processed data from this section is being prepared for 
-					// displaying, any entry where the time is a negative value
-					// will be ignored
+					// Initial time is negative (=-1) to ensure that cards 
+					// that do not exist within the time range will not be 
+					// counted in charts/tables.
+					// When the processed data from this section is being 
+					// prepared for displaying, any entry where the time is a 
+					// negative value will be ignored
 					var time = -1;
 					if (list_actions[i].length > 0){
 						var current_idCard = list_actions[i][0].idcard;
@@ -284,7 +294,8 @@ function generateFigure(idBoard, tabName){
 						result += "<tr>";
 						for (y = 2; y < table_cells[x].length; y++){
 							if(y==2 && x>0){
-								result += "<td style='border: 1px solid black'><a href='" 
+								result += 
+								"<td style='border: 1px solid black'><a href='" 
 								+ table_cells[x][1] + "'>" 
 								+ table_cells[x][y] + "</a></td>";
 							}
@@ -304,8 +315,10 @@ function generateFigure(idBoard, tabName){
 
 					// Create array for the overall table, 
 					// and insert the first row of the table
-					var averages_table = [['<b>List</b>', '<b>Average (Days)</b>', 
-					'<b>Standard Deviation (Days)</b>', '<b>Minimum Days</b>', '<b>Maximum Days</b>']];
+					var averages_table = [['<b>List</b>', 
+					'<b>Average (Days)</b>', 
+					'<b>Standard Deviation (Days)</b>', '<b>Minimum Days</b>', 
+					'<b>Maximum Days</b>']];
 
 					// console.log(list_names);
 					console.log(distribution_data);

@@ -54,7 +54,8 @@ router.get('/boards', (req, res, next) => {
 /* GET all boards containing the given member */
 router.get('/boards/:idmember', (req, res, next) =>{
     const idMember = req.params.idmember;
-    const qs = "SELECT * FROM Board WHERE memberships @> array ['" + idMember + "']::text[]";
+    const qs = "SELECT * FROM Board WHERE memberships @> array ['" 
+    + idMember + "']::text[]";
     getHelper(req, res, next, qs);
 });
 
@@ -121,7 +122,8 @@ router.get('/cards/memberships/:accessToken', (req, res, next) => {
     // get access token
     const accessToken = req.params.accessToken;
     // query statement to get userid using accesstoken
-    const qs1 = "SELECT id FROM Member WHERE accesstoken='" + accessToken + "'";
+    const qs1 = "SELECT id FROM Member WHERE accesstoken='" 
+    + accessToken + "'";
     const results = [];
     // get userid
     pool.connect(function (err, client, done){
@@ -139,8 +141,10 @@ router.get('/cards/memberships/:accessToken', (req, res, next) => {
             done();
             // return res.json(results[0].id);
             var userid = results[0].id;
-            // query statement to get the cards containing userid in memberships
-            const qs2 = "SELECT * FROM Card WHERE memberships @> array['" + userid + "']::text[]";
+            // query statement to get the cards containing userid 
+            // in memberships
+            const qs2 = "SELECT * FROM Card WHERE memberships @> array['" 
+            + userid + "']::text[]";
             // get cards
             getHelper(req, res, next, qs2);
         });
@@ -167,7 +171,8 @@ router.get('/actions/:idCard', (req, res, next) => {
             console.log(err);
             return res.status(500).json({success: false, data: err});
         }
-        const query = client.query(new pg.Query('SELECT * FROM Action WHERE idCard=($1)', [idCard]));
+        const query = client.query(new pg.Query('SELECT * FROM Action WHERE \
+        idCard=($1)', [idCard]));
         query.on('row', (row) => {
             results.push(row);
         });
@@ -181,7 +186,9 @@ router.get('/actions/:idCard', (req, res, next) => {
 /* GET actions by list */
 router.get('/actions_by_list/:listid', (req, res, next) => {
     const listid = req.params.listid;
-    const qs = "SELECT * FROM Action WHERE createdInListId='" + listid + "' or listBeforeId='" + listid + "' or listAfterId='" + listid + "' or closedInListId='" + listid + "' order by idcard, date";
+    const qs = "SELECT * FROM Action WHERE createdInListId='" + listid 
+    + "' or listBeforeId='" + listid + "' or listAfterId='" + listid 
+    + "' or closedInListId='" + listid + "' order by idcard, date";
     //console.log(qs);
     getHelper(req, res, next, qs);
 });

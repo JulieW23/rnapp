@@ -22,7 +22,8 @@ function openTab(evt, tabName, idBoard) {
 		$('#table').empty();
 	}
 
-	// Show the current tab, and add an "active" class to the button that opened the tab
+	// Show the current tab, and add an "active" class to the button that 
+	// opened the tab
 	document.getElementById(tabName).style.display = "block";
 	document.getElementById(tabName).className += " active";
 	// evt.currentTarget.className += "active";
@@ -49,6 +50,7 @@ $(function(){
 // use jquery ui date picker instead
 $(function(){
 	if($('.date_picker')[0].type != 'date'){
-		$('.date_picker').datepicker({dateFormat: "yy-mm-dd", maxDate: new Date()});
+		$('.date_picker').datepicker({dateFormat: "yy-mm-dd", 
+			maxDate: new Date()});
 	}
 });
