@@ -16,22 +16,18 @@
 
    `npm install` to install dependencies, then 
    
-   `node /models/trello.js` to create the Trello database tables, then
-   
-   `node /models/prosperworks.js` to create the Prosperworks database tables, then
+   `make tables` to create all database tables
    
    `npm start` to start the server
    
 ## Running Tests
 ### Trello Tests
 The test cases in tests/trello_tests.js test to see if data is correctly calculated and displayed in the app.
-* Make sure database tables are created. Database tables for Trello data can be created by running the command 
-
-   `node models/trello.js`
+* Make sure database tables are created.
 
 * Insert the data for the test cases with the command
 
-   `node tests/trello_tests.js`
+   `make trello_test`
 
 * Start the server with the command
 
@@ -41,3 +37,18 @@ The test cases in tests/trello_tests.js test to see if data is correctly calcula
 
 * Go to http://localhost:3000/trello?oauth_token=accesstoken1 to use the app with the inserted test data and compare the displayed information with the expected results.
 
+### ProsperWorks Tests
+The test cases in tests/pw_actions_tests.jst test to see if the action rows have been correctly completed (stage where each opportunity is created and stage where an opportunity has it's status changed). 
+
+* Make sure database tables are created.
+
+* Insert the data for the test cases with command
+   `make pw_test`
+   
+* Start the server with the command
+
+   `npm start`
+   
+ * The expected results are in the file pw_actions_results.txt
+ 
+ * From the psql command line, type in the query in line 1 of pw_actions_results.txt, and compare results.
