@@ -1,0 +1,59 @@
+QUERY: select id, type, opportunity_id, date, stagecreated, stagebefore, stageafter, stageclosed, closedstatus, closed from pwaction order by opportunity_id, date;
+
+   id     |  type         | opportunity_id |        date         | stagecreated | stagebefore | stageafter | stageclosed | closedstatus | closed 
+----------+---------------+----------------+---------------------+--------------+-------------+------------+-------------+--------------+--------
+ action1  | Created       | oid1           | 2017-01-01 00:00:00 | ps1          |             |            |             |              | 
+ action2  | Created       | oid2           | 2017-01-02 00:00:00 | ps1          |             |            |             |              | 
+ action3  | Status Change | oid2           | 2017-01-03 00:00:00 |              |             |            | ps1         | Won          | t
+ action4  | Status Change | oid2           | 2017-01-04 00:00:00 |              |             |            | ps1         | Abandoned    | 
+ action5  | Created       | oid3           | 2017-01-02 00:00:00 | ps1          |             |            |             |              | 
+ action6  | Status Change | oid3           | 2017-01-03 00:00:00 |              |             |            | ps1         | Won          | t
+ action7  | Status Change | oid3           | 2017-01-04 00:00:00 |              |             |            | ps1         | Open         | f
+ action8  | Stage Change  | oid3           | 2017-01-05 00:00:00 |              | ps1         | ps2        |             |              | 
+ action9  | Created       | oid4           | 2017-01-02 00:00:00 | ps1          |             |            |             |              | 
+ action10 | Status Change | oid4           | 2017-01-03 00:00:00 |              |             |            | ps1         | Won          | t
+ action11 | Status Change | oid4           | 2017-01-04 00:00:00 |              |             |            | ps1         | Open         | f
+ action12 | Stage Change  | oid4           | 2017-01-05 00:00:00 |              | ps1         | ps2        |             |              | 
+ action13 | Status Change | oid4           | 2017-01-06 00:00:00 |              |             |            | ps2         | Abandoned    | t
+ action14 | Created       | oid5           | 2017-01-02 00:00:00 | ps1          |             |            |             |              | 
+ action15 | Status Change | oid5           | 2017-01-03 00:00:00 |              |             |            | ps1         | Won          | t
+ action16 | Status Change | oid5           | 2017-01-04 00:00:00 |              |             |            | ps1         | Open         | f
+ action17 | Stage Change  | oid5           | 2017-01-05 00:00:00 |              | ps1         | ps2        |             |              | 
+ action18 | Status Change | oid5           | 2017-01-06 00:00:00 |              |             |            | ps2         | Abandoned    | t
+ action19 | Stage Change  | oid5           | 2017-01-07 00:00:00 |              | ps2         | ps3        |             |              | 
+ action20 | Created       | oid6           | 2017-01-02 00:00:00 | ps1          |             |            |             |              | 
+ action21 | Status Change | oid6           | 2017-01-03 00:00:00 |              |             |            | ps1         | Won          | t
+ action22 | Status Change | oid6           | 2017-01-04 00:00:00 |              |             |            | ps1         | Open         | f
+ action23 | Stage Change  | oid6           | 2017-01-05 00:00:00 |              | ps1         | ps2        |             |              | 
+ action24 | Status Change | oid6           | 2017-01-06 00:00:00 |              |             |            | ps2         | Abandoned    | t
+ action25 | Stage Change  | oid6           | 2017-01-07 00:00:00 |              | ps2         | ps3        |             |              | 
+ action26 | Status Change | oid6           | 2017-01-08 00:00:00 |              |             |            | ps3         | Lost         | 
+ action27 | Created       | oid7           | 2017-01-02 00:00:00 | ps1          |             |            |             |              | 
+ action28 | Status Change | oid7           | 2017-01-03 00:00:00 |              |             |            | ps1         | Won          | t
+ action29 | Status Change | oid7           | 2017-01-04 00:00:00 |              |             |            | ps1         | Open         | f
+ action30 | Stage Change  | oid7           | 2017-01-05 00:00:00 |              | ps1         | ps2        |             |              | 
+ action31 | Stage Change  | oid7           | 2017-01-06 00:00:00 |              | ps2         | ps3        |             |              | 
+ action32 | Created       | oid8           | 2017-01-02 00:00:00 | ps1          |             |            |             |              | 
+ action33 | Status Change | oid8           | 2017-01-03 00:00:00 |              |             |            | ps1         | Won          | t
+ action34 | Status Change | oid8           | 2017-01-04 00:00:00 |              |             |            | ps1         | Open         | f
+ action35 | Stage Change  | oid8           | 2017-01-05 00:00:00 |              | ps1         | ps2        |             |              | 
+ action36 | Stage Change  | oid8           | 2017-01-06 00:00:00 |              | ps2         | ps3        |             |              | 
+ action37 | Status Change | oid8           | 2017-01-07 00:00:00 |              |             |            | ps3         | Won          | t
+ action38 | Created       | oid9           | 2017-01-02 00:00:00 | ps1          |             |            |             |              | 
+ action39 | Status Change | oid9           | 2017-01-03 00:00:00 |              |             |            | ps1         | Won          | t
+ action41 | Stage Change  | oid9           | 2017-01-04 00:00:00 |              | ps1         | ps2        |             |              | 
+ action42 | Stage Change  | oid9           | 2017-01-05 00:00:00 |              | ps2         | ps3        |             |              | 
+ action43 | Status Change | oid9           | 2017-01-06 00:00:00 |              |             |            | ps3         | Open         | f
+ action44 | Stage Change  | oid9           | 2017-01-07 00:00:00 |              | ps3         | ps4        |             |              | 
+ action45 | Stage Change  | oid9           | 2017-01-08 00:00:00 |              | ps4         | ps5        |             |              | 
+ action46 | Created       | oid10          | 2017-01-02 00:00:00 | ps1          |             |            |             |              | 
+ action47 | Status Change | oid10          | 2017-01-03 00:00:00 |              |             |            | ps1         | Won          | t
+ action48 | Stage Change  | oid10          | 2017-01-04 00:00:00 |              | ps1         | ps2        |             |              | 
+ action49 | Stage Change  | oid10          | 2017-01-05 00:00:00 |              | ps2         | ps3        |             |              | 
+ action50 | Status Change | oid10          | 2017-01-06 00:00:00 |              |             |            | ps3         | Open         | f
+ action51 | Stage Change  | oid10          | 2017-01-07 00:00:00 |              | ps3         | ps4        |             |              | 
+ action52 | Stage Change  | oid10          | 2017-01-08 00:00:00 |              | ps4         | ps5        |             |              | 
+ action53 | Status Change | oid10          | 2017-01-09 00:00:00 |              |             |            | ps5         | Lost         | t
+
+
+
