@@ -1,4 +1,5 @@
 tables:
+	node models/system.js
 	node models/trello.js
 	node models/prosperworks.js
 test_data:

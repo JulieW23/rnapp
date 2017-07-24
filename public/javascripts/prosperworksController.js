@@ -1,7 +1,7 @@
 angular.module('prosperworks', [])
 .controller('pwController', ($scope, $http) => {
 	$scope.pipelineSelected = pipelineSelected;
-	$scope.openTab=openTab;
+	$scope.openTab = openTab;
 	// get pipelines
 	$http.get('/prosperworks/pipelines')
 	.success((data) => {

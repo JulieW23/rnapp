@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  	<head>
+    	<title><%= title %></title>
+    	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    	<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    	<link rel='stylesheet' href='/stylesheets/style.css' />
+    	<!-- <link rel='stylesheet' href='/stylesheets/trello.css' /> -->
+  	</head>
+
+  	<body>
+  		<div class="container">
+    		<h1><%= title %></h1>
+
+        <h2>Connect to a new ProsperWorks Account:</h2>
+        <p>Instructions for generating an API Key <a href="https://www.prosperworks.com/developer_api/token_generation">here</a></p>
+        API Key: <input type="text"><br><br>
+        User Email: <input type="text"><br><br>
+        <a href="./prosperworks"><button>Connect</button></a>
+        <h2>Already stored ProsperWorks accounts:</h2>
+        <div></div>
+    	</div>
+
+    	<!-- include jquery -->
+    	<script src="//code.jquery.com/jquery-2.2.4.min.js" type="text/javascript"></script>
+    	<!-- include bootstrap js -->
+    	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+   		<!-- include angular js -->
+    	<script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.6/angular.min.js"></script>
+    	<!-- include angular controller for this page -->
+    	<!-- <script src="javascripts/trelloController.js"></script> -->
+    	<!-- include front end js -->
+    	<!-- <script src="javascripts/trello.js"></script> -->
+      <!-- include jquery ui for date picker in non-chrome browsers -->
+      <script src = "https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+      <!-- stylesheet for jquery ui -->
+      <link href = "https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css" rel = "stylesheet">
+      <!-- include async handling -->
+      <script type="text/javascript" src="https://cdn.jsdelivr.net/async/2.4.0/async.js"></script>
+
+  </body>
+
+</html>

@@ -25,61 +25,11 @@ function addMonths(date, months){
 
 
 // Process database data and generate the figure for the selected tab
-function generateFigure(idBoard, tabName){
+function generateFigure(idBoard, tabName, fromInput, toInput){
 	// process user selected time range
-	var fromDate;
-	var toDate;
-	if (tabName == 'distribution-table'){
-		// if date(s) not selected
-		if (!document.getElementById("tableFromDate").value || 
-		!document.getElementById("tableToDate").value){
-			alert("Date range is not selected.");
-			return;
-		}
-		// if from date is after to date
-		else if (document.getElementById("tableFromDate").value > 
-		document.getElementById("tableToDate").value){
-			alert("'From' date needs to be before 'To' date,");
-			return;
-		}
-		// if no problems with input
-		else {
-			fromDate = document.getElementById("tableFromDate").value;
-			toDate = document.getElementById("tableToDate").value;
-		}
-	}
-	else if (tabName == 'distribution-graph-tab') {
-		if (!document.getElementById("distributionFromDate").value || 
-		!document.getElementById("distributionToDate").value){
-			alert("Date range is not selected.");
-			return;
-		}
-		else if (document.getElementById("distributionFromDate").value > 
-		document.getElementById("distributionToDate").value){
-			alert("'From' date needs to be before 'To' date,");
-			return;
-		}
-		else {
-			fromDate = document.getElementById("distributionFromDate").value;
-			toDate = document.getElementById("distributionToDate").value;
-		}
-	}
-	else if (tabName == 'list-graph-tab') {
-		if (!document.getElementById("listFromDate").value || 
-		!document.getElementById("listToDate").value){
-			alert("Date range is not selected.");
-			return;
-		}
-		else if (document.getElementById("listFromDate").value > 
-		document.getElementById("listToDate").value){
-			alert("'From' date needs to be before 'To' date,");
-			return;
-		}
-		else {
-			fromDate = document.getElementById("listFromDate").value;
-			toDate = document.getElementById("listToDate").value;
-		}
-	}
+	var range = getTimeRange(fromInput, toInput);
+	var fromDate = range.fromDate;
+	var toDate = range.toDate;
 	//oauth_token from url, used to identify the user, and get only cards that 
 	// the user has access to
 	var oauth_token = urlParam("oauth_token");

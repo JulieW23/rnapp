@@ -101,7 +101,7 @@
               <form>
                 From: <input type="date" name="from" id="listFromDate" class="date_picker">
                 To: <input type="date" name="to" id="listToDate" class="date_picker">
-                <input type="submit" ng-click="generateFigure(selectedBoard.id, 'list-graph-tab')">
+                <input type="submit" ng-click="generateFigure(selectedBoard.id, 'list-graph-tab', 'listFromDate', 'listToDate')">
               </form>
 
             	<div id="list-graph">
@@ -116,7 +116,7 @@
                 <form>
                   From: <input type="date" name="from" id="distributionFromDate" class="date_picker">
                   To: <input type="date" name="to" id="distributionToDate" class="date_picker">
-                  <input type="submit" ng-click="generateFigure(selectedBoard.id, 'distribution-graph-tab')">
+                  <input type="submit" ng-click="generateFigure(selectedBoard.id, 'distribution-graph-tab', 'distributionFromDate', 'distributionToDate')">
                 </form>
 
                 <div id="overall-table">
@@ -133,7 +133,7 @@
               <form>
                 From: <input type="date" name="from" id="tableFromDate" class="date_picker">
                 To: <input type="date" name="to" id="tableToDate" class="date_picker">
-                <input type="submit" ng-click="generateFigure(selectedBoard.id, 'distribution-table')">
+                <input type="submit" ng-click="generateFigure(selectedBoard.id, 'distribution-table', 'tableFromDate', 'tableToDate')">
               </form>
 
               <div id="table">

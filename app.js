@@ -17,6 +17,8 @@ var routes = require('./routes/index');
 var trello = require('./routes/trello');
 // var prosperworks_account = require('./routes/prosperworks_account');
 var prosperworks = require('./routes/prosperworks');
+var createAccount = require('./routes/createAccount');
+var login = require('./routes/login');
 
 var app = express();
 
@@ -54,6 +56,8 @@ app.use('/', routes);
 app.use('/trello', trello);
 // app.use('/prosperworks_account', prosperworks_account);
 app.use('/prosperworks', prosperworks);
+app.use('/createaccount', createAccount);
+app.use('/login', login);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

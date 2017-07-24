@@ -283,9 +283,7 @@ function storePWActivities(){
 						done();
 					}); // end of insert action query
 				}
-				// NEED TO KEEP RECORD OF ALL STATUS CHANGES
-				// BUT THIS WILL AFFECT THE ASSUMPTION THAT ROWS ARE ALWAYS
-				// ALTERNATING BETWEEN ENTERING AND EXITING IN THE
+
 				// DATA CALCULATION SECTION
 				
 				else if (activity.type.name == 'Status Change'){
@@ -330,108 +328,156 @@ function storePWActivities(){
 	}); // end of get activity request
 } // end of storePWActivities()
 
-// completes activities that are missing pipeline_stage_id
+// completes activities in our database that are missing pipeline_stage_id
 // called by storePSActivities()
 function completeActivities(){
+	// store all actions for all opportunities after all the missing
+	// locations have been filled in
+	var all_actions = [];
+	// total number of opportunities in the database, used to check 
+	// whether all missing locations have been filled in so that 
+	// the database can be updated 
+	var num_opportunities;
 	// get all opportunities from database
 	pool.query("SELECT id, pipeline_stage_id FROM Opportunity", 
 	function(err, result){
+		num_opportunities = result.rows.length;
 		// for each opportunity
 		async.eachSeries(result.rows, function(opportunity, done){
-			// get all the actions for this opportunity
+			// get all actions for this opportunity ordered by date
 			pool.query("SELECT * FROM PWAction WHERE opportunity_id=($1) \
-			order by date", [opportunity.id], function(err, result1){
+			order by date", [opportunity.id], function(err1, result1){
 				if(err){
 					nothing=1;
 				}
-				// get the index of the first movement, if there is one
-				var i = 0;
-				while(i < result1.rows.length && 
-				(result1.rows[i].type == 'Created' || 
-				result1.rows[i].type == 'Status Change')){
-					i++;
-				}
-				// CASE 1: this opportunity never moves
-				// approach: use the current stage of the opportunity
-				if (i == result1.rows.length){
-					// for each action of this opportunity
-					async.eachSeries(result1.rows, function(action, done1){
-						// get the name of the current stage of the opportunity
-						pool.query("SELECT name FROM PipelineStage \
-						WHERE id=($1)", [opportunity.pipeline_stage_id], 
-						function(err, result2){
-							if(err){
-								nothing = 1;
-							}
-							// if the action is creating the opportunity
-							// fill in stagecreatedid with current stage id and
-							// stagecreated with current stage name
-							if (action.type == 'Created'){
-								pool.query("UPDATE PWAction SET \
-								stagecreatedid=($1), stagecreated=($2) \
-								WHERE id=($3)", 
-								[opportunity.pipeline_stage_id, 
-								result2.rows[0].name, action.id], 
-								function(err, result3){
-									if (err){
-										nothing = 1;
-									}
-									done1();
-								});
-							}
-							// if action is closing or reopening opportunity,
-							// fill in stageclosedid with current stage id and
-							// stageclosed with current stage name
-							else if (action.type == 'Status Change'){
-								pool.query("UPDATE PWAction SET \
-								stageclosedid=($1), stageclosed=($2) \
-								WHERE id=($3)", 
-								[opportunity.pipeline_stage_id, 
-								result2.rows[0].name, action.id], 
-								function(err, result2){
-									if(err){
-										console.log('Error: ' + err);
-										nothing = 1;
-									}
-									done1();
-								});
-							}
-						})
-					});
-				} // end of case 1
-				// CASE 2:
-				// if there are movements
-				else{
-					async.eachSeries(result1.rows.slice(0, i), 
-					function(action, done1){
-						if(action.type == 'Created'){
-							pool.query("UPDATE PWAction SET \
-							stagecreatedid=($1) WHERE id=($2)", 
-							[result1.rows[i].stagebeforeid, action.id], 
-							function(err, result2){
-								if(err){
-									nothing = 1;
-								}
-								done1();
-							});
+
+				var actions = [];
+				// store all the actions in var actions[]
+				async.eachSeries(result1.rows, function(action, done1){
+					actions.push(action);
+					done1();
+					// the following code fills in all of the missing 
+					// locations in var actions[]
+				}, function(err1){
+					// keeps track of the current state in the automata
+					var state;
+					// put var actions[] through the automata
+					// view automata figure here:
+					// https://docs.google.com/drawings/d/1yZhhx8YAf4SFJMBt63Npn1v9o00IoAK8Y55h56gFUlI/edit?usp=sharing
+					for(i = 0; i < actions.length; i++){
+
+						if(actions[i].type == 'Created'){
+							state = 'c1';
 						}
-						else if(action.type == 'Status Change'){
-							pool.query("Update PWAction SET \
-							stageclosedid=($1) WHERE id=($2)", 
-							[result1.rows[i].stagebeforeid, action.id], 
-							function(err, result2){
-								if(err){
-									nothing = 1;
-								}
-								done1();
-							});
+
+						else if (state == 'c1' && 
+						actions[i].type == 'Status Change'){
+							state = 'c2';
 						}
-					});
-				} // end of case2
-				done();
-			}); // end of select actions for an opportunity
-		}); // end of for each opportunity
-	}); // end of select all opportunities
+
+						else if (state == 'c1' && 
+						actions[i].type == 'Stage Change'){
+							state = 'c3';
+							actions[i-1].stagecreated = actions[i].stagebefore;
+							actions[i-1].stagecreatedid = 
+							actions[i].stagebeforeid;
+						}
+
+						else if (state == 'c2' &&
+						actions[i].type == 'Stage Change'){
+							state = 'c3';
+							for (j = 0; j < i; j++){
+								if (actions[j].type == 'Created'){
+									actions[j].stagecreated = 
+									actions[i].stagebefore;
+									actions[j].stagecreatedid = 
+									actions[i].stagebeforeid;
+								}
+								else if (actions[j].type == 'Status Change'){
+									actions[j].stageclosed = 
+									actions[i].stagebefore;
+									actions[j].stageclosedid = 
+									actions[i].stagebeforeid;
+								}
+							}
+						}
+
+						else if (state == 'c3' && 
+						actions[i].type == 'Status Change'){
+							state = 'c4';
+							actions[i].stageclosed = actions[i-1].stageafter;
+							actions[i].stageclosedid = 
+							actions[i-1].stageafterid;
+						}
+
+						else if (state == 'c4' && 
+						actions[i].type == 'Status Change'){
+							state = 'c4';
+							actions[i].stageclosed = actions[i-1].stageclosed;
+							actions[i].stageclosedid = 
+							actions[i-1].stageclosedid;
+						}
+
+						else if (state == 'c4' &&
+						actions[i].type == 'Stage Change'){
+							state = 'c3';
+						}
+					}
+					if(state == 'c1' || state == 'c2'){
+						var curr_location = opportunity.pipeline_stage_id;
+						for (k = 0; k < actions.length; k++){
+							if (actions[k].type == 'Created'){
+								actions[k].stagecreatedid = curr_location;
+							}
+							else if (actions[k].type == 'Status Change'){
+								actions[k].stageclosedid = curr_location;
+							}
+						}
+					}
+					// put var actions[] into var all_actions[], which will be
+					// used to update the database records
+					all_actions.push(actions);
+					// update database records
+					if (all_actions.length == num_opportunities){
+						async.eachSeries(all_actions, 
+						function(action_list, done2){
+							async.eachSeries(action_list, 
+							function(action1, done3){
+								if (action1.type == 'Created'){
+									pool.query("UPDATE PWAction SET \
+									stagecreated=($1), stagecreatedid=($2) \
+									WHERE id=($3)", [action1.stagecreated, 
+									action1.stagecreatedid, action1.id], 
+									function(err, res){
+										if(err){ 
+											// console.log(err);
+											nothing = 1; 
+										}
+										done3();
+									});
+								}
+								else if (action1.type == 'Status Change'){
+									pool.query("UPDATE PWAction SET \
+									stageclosed=($1), stageclosedid=($2) \
+									WHERE id=($3)", [action1.stageclosed, 
+									action1.stageclosedid, action1.id], 
+									function(err, res){
+										if(err){ 
+											nothing = 1;
+											// console.log(err);
+										}
+										done3();
+									});
+								}
+								else{ done3(); }
+							}, function(err){ done2(); });
+						});
+					} // end of updating database (if)
+				}); // end of filling in missing locations (async each action)
+			}); // end of get all actions for a specific opportunity from db
+			done();
+		}); // end of for each opportunity (async)
+	}); // end of get all opportunities from database
 } // end of completeActivities()
 
 

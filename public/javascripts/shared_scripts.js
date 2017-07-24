@@ -54,3 +54,26 @@ $(function(){
 			maxDate: new Date()});
 	}
 });
+
+// helper function to get input time range
+function getTimeRange(fromInput, toInput){
+	var dateRange = {};
+	// if date(s) not selected
+	if (!document.getElementById(fromInput).value || 
+	!document.getElementById(toInput).value){
+		alert("Date range is not selected.");
+		return;
+	}
+	// if from date is after to date
+	else if (document.getElementById(fromInput).value > 
+	document.getElementById(toInput).value){
+		alert("FROM date needs to be before TO date.");
+		return;
+	}
+	// if no problems with date input
+	else{
+		dateRange.fromDate = document.getElementById(fromInput).value;
+		dateRange.toDate = document.getElementById(toInput).value;
+	}
+	return dateRange;
+}
