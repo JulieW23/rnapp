@@ -63,12 +63,37 @@ router.get('/pipelinestages', (req, res, next) => {
 	getHelper(req, res, next, qs);
 });
 
+/* GET pipeline stages by pipeline */
+router.get('/pipelinestages/pipeline/:pipelineid', (req, res, next) => {
+    const pipelineid = req.params.pipelineid;
+    const qs = "SELECT * FROM PipelineStage WHERE pipeline_id='" + pipelineid + "'";
+    getHelper(req, res, next, qs);
+});
+
 /* ================================================================
 // OPPORTUNITIES
 ================================================================ */ 
+/* GET all opportunities */
 router.get('/opportunities', (req, res, next) => {
 	const qs = 'SELECT * FROM Opportunity';
 	getHelper(req, res, next, qs);
 });
 
+/* GET opportunities by pipeline */
+router.get('/opportunities/pipeline/:pipelineid', (req, res, next) => {
+    const pipelineid = req.params.pipelineid;
+    const qs = "SELECT * FROM Opportunity WHERE pipeline_id='" + pipelineid + "'";
+    getHelper(req, res, next, qs);
+});
 
+/* ================================================================
+// PWAction
+================================================================ */ 
+/* GET actions by stage */
+router.get('/actions_by_stage/:stageid', (req, res, next) => {
+    const stageid = req.params.stageid;
+    const qs = "SELECT * FROM PWAction WHERE stagecreatedid='" + stageid + 
+    "' or stagebeforeid='" + stageid + "' or stageafterid='" + stageid 
+    + "' or (stageclosedid='" + stageid + "' and closed is not null) order by opportunity_id, date";
+    getHelper(req, res, next, qs);
+});

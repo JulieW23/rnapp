@@ -44,10 +44,12 @@
           <form>
             From: <input type="date" name="from" id="distributionFromDate" class="date_picker">
             To: <input type="date" name="to" id="distributionToDate" class="date_picker">
-            <input type="submit">
+            <input type="submit" ng-click="opTimeDistribution(selectedPipeline.id, 'distributionFromDate', 'distributionToDate')">
           </form>
 
-          <div></div>
+          <div id="overall-table"></div>
+
+          <div id="distribution-graph"></div>
 
         </div>
 

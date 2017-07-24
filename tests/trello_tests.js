@@ -212,7 +212,7 @@ client.query("INSERT INTO Action VALUES ('actionid27', 'cardid9', \
 	'2016-01-26 00:00:00.000', 'updateCard', NULL, NULL, NULL, 'List B1', \
 	NULL, NULL, NULL, 'listid2', NULL, NULL, 'true')");
 
-// CASE 10: move a card to a new boad and then close it
+// CASE 10: move a card to a new board and then close it
 // created cardid10 in listid1
 client.query("INSERT INTO Action VALUES ('actionid29', 'cardid10', \
 	'2016-01-01 00:00:00.000', 'createCard', 'List A1', NULL, NULL, NULL, \

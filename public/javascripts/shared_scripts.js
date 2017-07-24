@@ -29,6 +29,7 @@ function openTab(evt, tabName, idBoard) {
 	// evt.currentTarget.className += "active";
 }
 
+
 // Limits date picker so user cannot select future dates
 $(function(){
     var dtToday = new Date();
@@ -46,6 +47,7 @@ $(function(){
     $('.date_picker').attr('max', maxDate);
 });
 
+
 // if date picker is not supported on the browser being used, 
 // use jquery ui date picker instead
 $(function(){
@@ -54,6 +56,13 @@ $(function(){
 			maxDate: new Date()});
 	}
 });
+
+
+// Format date to milliseconds and correct timezone
+function ms(date){
+	return Date.parse(date) - 14400000;
+}
+
 
 // helper function to get input time range
 function getTimeRange(fromInput, toInput){
@@ -76,4 +85,10 @@ function getTimeRange(fromInput, toInput){
 		dateRange.toDate = document.getElementById(toInput).value;
 	}
 	return dateRange;
+}
+
+
+// Addition helper
+function add(a, b){
+	return a + b;
 }

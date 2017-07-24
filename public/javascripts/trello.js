@@ -418,18 +418,6 @@ function generateFigure(idBoard, tabName, fromInput, toInput){
 } // end of generateFigure function
 
 
-// Addition helper
-function add(a, b){
-	return a + b;
-}
-
-
-// Format date to milliseconds and correct timezone
-function ms(date){
-	return Date.parse(date) - 14400000;
-}
-
-
 // Format date to be displayed 
 function formatDate(date){
 	var milliseconds = Date.parse(date) - 14400000; // minus 8 hours
