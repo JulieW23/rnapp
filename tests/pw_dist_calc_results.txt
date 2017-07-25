@@ -1,0 +1,20 @@
+/* ====== EXPECTED RESULTS ===== */
+
+/*  ps1 */
+// oid2: 4 days
+// oid3: 2 days
+// oid4: 3 days
+// oid5: 7 days
+// oid6: 4 days
+// oid7: 3 days
+// oid8: 7 days
+// oid9: 7 days
+// oid10: 4 days
+
+/*  ps2 */
+// oid3: 3 days
+// oid5: 7 days
+// oid7: 4 days
+// oid10: 4 days
+
+/*  ps3 */

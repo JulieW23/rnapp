@@ -7,5 +7,8 @@ test_data:
 	node tests/pw_actions_tests.js
 trello_test:
 	node tests/trello_tests.js
-pw_test:
+pw_db_test:
 	node tests/pw_actions_tests.js
+pw_dist_test:
+	node tests/pw_dist_calc_tests.js
+	
