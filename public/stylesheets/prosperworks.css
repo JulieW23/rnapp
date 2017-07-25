@@ -1,8 +1,22 @@
 body {
-	min-width: 765px;
+	min-width: 1000px;
 }
 
 #reload-button {
 	float: right;
 	margin-bottom: 3px;
+}
+
+.details {
+	padding-right: 20px;
+}
+
+.count-heading{
+	padding-top: 20px;
+	padding-right: 10px;
+	font-size: 30px;
+}
+
+.count-subheading{
+	font-size: 20px;
 }

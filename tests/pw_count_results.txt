@@ -1,0 +1,23 @@
+COUNT TOTALS:
+Created: 9
+Won: 3
+Lost: 3
+Abandoned: 2
+
+ps1:
+Created: 4
+Won: 2
+Lost: 1
+Abandoned: 0
+
+ps2:
+Created: 3
+Won: 1
+Lost: 1
+Abandoned: 1
+
+ps3:
+Created: 2
+Won: 0
+Lost: 1
+Abandoned: 1

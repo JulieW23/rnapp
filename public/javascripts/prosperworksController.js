@@ -3,6 +3,7 @@ angular.module('prosperworks', [])
 	$scope.pipelineSelected = pipelineSelected;
 	$scope.openTab = openTab;
 	$scope.opTimeDistribution = opTimeDistribution;
+	$scope.opActivity = opActivity;
 	// get pipelines
 	$http.get('/prosperworks/pipelines')
 	.success((data) => {

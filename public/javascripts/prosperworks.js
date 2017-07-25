@@ -4,8 +4,85 @@ function pipelineSelected(pipelineID){
 	document.getElementById('hidden_tab').style.display="block";
 }
 
+// Finds number of opportunities created, closed, won, lost, abandoned and 
+// reopened within selected time frame
+function opActivity(pipelineid, fromInput, toInput){
+	// process user selected time range
+	var dateRange = getTimeRange(fromInput, toInput);
+	// names of all pipeline stages in the selected pipeline
+	var stage_names = [];
+	// all of the below arrays have the same order as stage_names
+	// opp id and monetary value of opps created in time range, for each stage
+	// [[], [], [], ...]
+	var oppid_and_value = [];
+	// number of opportunites created in each pipeline in given time range
+	var created_count = [];
+	// oid created in each pipeline in given time range
+	// [[], [], [], ...]
+	var created_oid = [];
+	// number of opportunities won in each pipeline in given time range
+	var won_count = [];
+	// oid won in each pipeline in given time range
+	// [[], [], [], ...]
+	var won_oid = [];
+	// number of opportunities lost in each pipeline in given time range
+	var lost_count = [];
+	// oid lost in each pipeline in given time range
+	// [[], [], [], ...]
+	var lost_oid = [];
+	// number of opportunities abandoned in each pipeline in given time range
+	var abandoned_count = [];
+	// oid won in each pipeline in given time range
+	// [[], [], [], ...]
+	var abandoned_oid = [];
+	// fill in oppid_and_value
+	$.get('/prosperworks/opportunities/pipeline/' + pipelineid, function(opp_data){
+		for (i = 0; i < opp_data.length; i++){
+			var push = {
+				opportunity_id: opp_data[i].id, 
+				monetary_value: opp_data[i].monetary_value
+			};
+			oppid_and_value.push(push);
+		}
+	}).done(function(){
+		console.log(oppid_and_value);
+		// get pipeline stages for this pipeline
+		$.get('/prosperworks/pipelinestages/pipeline/' + pipelineid, function(data){
+			// created
+			countHelper(data, 'created', dateRange, created_count, created_oid);
+			// won
+			countHelper(data, 'won', dateRange, won_count, won_oid);
+			// lost
+			countHelper(data, 'lost', dateRange, lost_count, lost_oid);
+			// abandoned
+			countHelper(data, 'abandoned', dateRange, abandoned_count, abandoned_oid);
+		});
+	});
+}
+
+// helps fill in count data, called by opActivity()
+function countHelper(data, status, dateRange, count_array, oid_array){
+	async.eachSeries(data, function(stage, done){
+		$.get('/prosperworks/' + status + '_actions/' + stage.id + '/' + 
+		dateRange.fromDate + '/' + dateRange.toDate, function(data1){
+			count_array.push(data1.length);
+			var push = [];
+			for (i = 0; i < data1.length; i++){
+				push.push(data1[i].opportunity_id);
+			}
+			oid_array.push(push);
+			done();
+		});
+	}, function(err){
+		$('#' + status + '-count').empty();
+		$('#' + status + '-count').append(count_array.reduce(add, 0));
+		console.log(count_array);
+		console.log(oid_array);
+	});
+}
+
+// Calculates opportunities time distribution
 function opTimeDistribution(pipelineid, fromInput, toInput){
-	console.log('clicked');
 	// process user selected time range
 	var dateRange = getTimeRange(fromInput, toInput);
 
@@ -32,7 +109,8 @@ function opTimeDistribution(pipelineid, fromInput, toInput){
 		});
 	}).done(function(){
 		// get pipeline stages for this pipeline
-		$.get('prosperworks/pipelinestages/pipeline/' + pipelineid, function(data){
+		$.get('prosperworks/pipelinestages/pipeline/' + 
+		pipelineid, function(data){
 			stage_names = new Array(data.length);
 			stage_actions = new Array(data.length);
 			length = data.length;
@@ -42,12 +120,14 @@ function opTimeDistribution(pipelineid, fromInput, toInput){
 			});
 		}).done(function(){
 			for (i = 0; i < opportunities.length; i++){
-				opp_id_and_name.push([opportunities[i].id, opportunities[i].name, opportunities[i].pipeline_stage_id]);
+				opp_id_and_name.push([opportunities[i].id, 
+					opportunities[i].name, opportunities[i].pipeline_stage_id]);
 			}
 			// for each stage
 			async.eachSeries(stage_id_and_name, function(stage, done){
 				// get the actions for the stage and store them in stage_actions
-				$.get('/prosperworks/actions_by_stage/' + stage[0], function(data1){
+				$.get('/prosperworks/actions_by_stage/' + stage[0], 
+				function(data1){
 					var index1 = stage_id_and_name.indexOf(stage);
 					stage_actions[index1] = new Array(data1.length);
 					$.each(data1, function(index2, action){
@@ -73,20 +153,27 @@ function opTimeDistribution(pipelineid, fromInput, toInput){
 					// for every action
 					for (j = 0; j < stage_actions[i].length; j++){
 						// if this and next action are for the same card
-						if(stage_actions[i][j+1] && stage_actions[i][j].opportunity_id == stage_actions[i][j+1].opportunity_id){
+						if(stage_actions[i][j+1] && 
+						stage_actions[i][j].opportunity_id == 
+						stage_actions[i][j+1].opportunity_id){
 							// if both actions are in the time range
-							if (stage_actions[i][j].date >= dateRange.fromDate && stage_actions[i][j+1].date <= dateRange.toDate){
+							if (stage_actions[i][j].date >= dateRange.fromDate 
+							&& stage_actions[i][j+1].date <= dateRange.toDate){
 								if(time == -1){
 									time = 0;
 								}
-								time += (ms(stage_actions[i][j+1].date) - ms(stage_actions[i][j].date))/3600000;
+								time += (ms(stage_actions[i][j+1].date) - 
+									ms(stage_actions[i][j].date))/3600000;
 							}
 							j++;
 							// if the next action is for a different card
-							if (stage_actions[i][j+1] && stage_actions[i][j].opportunity_id != stage_actions[i][j+1].opportunity_id){
+							if (stage_actions[i][j+1] && 
+							stage_actions[i][j].opportunity_id != 
+							stage_actions[i][j+1].opportunity_id){
 								tTime[k] = time;
 								oppid[k] = current_oppid;
-								current_oppid = stage_actions[i][j+1].opportunity_id;
+								current_oppid = 
+								stage_actions[i][j+1].opportunity_id;
 								time = -1;
 								k++;
 							}
@@ -107,7 +194,8 @@ function opTimeDistribution(pipelineid, fromInput, toInput){
 							k++;
 							// if there are still actions for other cards
 							if (stage_actions[i][j+1]){
-								current_oppid = stage_actions[i][j+1].opportunity_id;
+								current_oppid = 
+								stage_actions[i][j+1].opportunity_id;
 							}
 						}
 					} // all data has been processed for this stage
@@ -141,18 +229,21 @@ function opTimeDistribution(pipelineid, fromInput, toInput){
 				for( i = 0; i < stage_names.length; i++){
 					// go through distribution_data and replace opp ids with opp names
 					for (j = 0; j < distribution_data[i].length; j++){
-						for (k = 0; k < distribution_data[i][j].opportunities.length; k++){
+						for (k = 0; k < 
+						distribution_data[i][j].opportunities.length; k++){
 							for (n = 0; n < opp_id_and_name.length; n++){
-								if(distribution_data[i][j].opportunities[k] == opp_id_and_name[n][0]){
-									distribution_data[i][j].opportunities[k] = "<br>"  
-									+ opp_id_and_name[n][1];
+								if(distribution_data[i][j].opportunities[k] == 
+								opp_id_and_name[n][0]){
+									distribution_data[i][j].opportunities[k] = 
+									"<br>" + opp_id_and_name[n][1];
 								}
 							}
 						}
 					}
 					// get rid of all empty columns only at the end of the chart
 					var last_useful=distribution_data[i].length -1;
-					while (last_useful >= 0 && distribution_data[i][last_useful].y == 0){
+					while (last_useful >= 0 && 
+					distribution_data[i][last_useful].y == 0){
 						last_useful--;
 					}
 					$('#distribution-graph').append("<div id='distribution-graph" + [i] 

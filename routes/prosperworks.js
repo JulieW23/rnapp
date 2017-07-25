@@ -94,6 +94,52 @@ router.get('/actions_by_stage/:stageid', (req, res, next) => {
     const stageid = req.params.stageid;
     const qs = "SELECT * FROM PWAction WHERE stagecreatedid='" + stageid + 
     "' or stagebeforeid='" + stageid + "' or stageafterid='" + stageid 
-    + "' or (stageclosedid='" + stageid + "' and closed is not null) order by opportunity_id, date";
+    + "' or (stageclosedid='" + stageid + 
+    "' and closed is not null) order by opportunity_id, date";
     getHelper(req, res, next, qs);
 });
+
+/* GET created actions count for a pipeline_stage_id between a time range*/
+router.get('/created_actions/:stageid/:fromDate/:toDate', (req, res, next) => {
+    const stageid = req.params.stageid;
+    const fromDate = req.params.fromDate;
+    const toDate = req.params.toDate;
+    const qs = "SELECT opportunity_id FROM PWAction WHERE stagecreatedid='" + stageid + 
+    "' AND date BETWEEN '" + fromDate + 
+    "'::timestamp AND '" + toDate + "'::timestamp";
+    getHelper(req, res, next, qs);
+});
+
+/* GET won actions count for a pipeline_stage_id between a time range*/
+router.get('/won_actions/:stageid/:fromDate/:toDate', (req, res, next) => {
+    const stageid = req.params.stageid;
+    const fromDate = req.params.fromDate;
+    const toDate = req.params.toDate;
+    const qs = "SELECT opportunity_id FROM PWAction WHERE stageclosedid='" + stageid + 
+    "' AND closedstatus='Won' AND date BETWEEN '" + fromDate + 
+    "'::timestamp AND '" + toDate + "'::timestamp";
+    getHelper(req, res, next, qs);
+});
+
+/* GET lost actions count for a pipeline_stage_id between a time range*/
+router.get('/lost_actions/:stageid/:fromDate/:toDate', (req, res, next) => {
+    const stageid = req.params.stageid;
+    const fromDate = req.params.fromDate;
+    const toDate = req.params.toDate;
+    const qs = "SELECT opportunity_id FROM PWAction WHERE stageclosedid='" + stageid + 
+    "' AND closedstatus='Lost' AND date BETWEEN '" + fromDate + 
+    "'::timestamp AND '" + toDate + "'::timestamp";
+    getHelper(req, res, next, qs);
+});
+
+/* GET abandoned actions count for a pipeline_stage_id between a time range*/
+router.get('/abandoned_actions/:stageid/:fromDate/:toDate', (req, res, next) => {
+    const stageid = req.params.stageid;
+    const fromDate = req.params.fromDate;
+    const toDate = req.params.toDate;
+    const qs = "SELECT opportunity_id FROM PWAction WHERE stageclosedid='" + stageid + 
+    "' AND closedstatus='Abandoned' AND date BETWEEN '" + fromDate + 
+    "'::timestamp AND '" + toDate + "'::timestamp";
+    getHelper(req, res, next, qs);
+});
+

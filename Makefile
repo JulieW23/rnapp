@@ -11,4 +11,6 @@ pw_db_test:
 	node tests/pw_actions_tests.js
 pw_dist_test:
 	node tests/pw_dist_calc_tests.js
+pw_count_test:
+	node tests/pw_count_tests.js
 	
