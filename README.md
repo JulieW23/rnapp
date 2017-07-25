@@ -43,7 +43,7 @@ The test cases in tests/pw_actions_tests.jst test to see if the action rows have
 * Make sure database tables are created.
 
 * Insert the data for the test cases with command
-   `make pw_test`
+   `make pw_db_test`
    
 * Start the server with the command
 
@@ -52,3 +52,17 @@ The test cases in tests/pw_actions_tests.jst test to see if the action rows have
  * The expected results are in the file pw_actions_results.txt
  
  * From the psql command line, type in the query in line 1 of pw_actions_results.txt, and compare results.
+
+The test cases in tests/pw_dist_calc_tests.js test to see whether the opportunity time distribution data is correctly calculated and displayed in the app.
+
+* Make sure database tables are created.
+
+* Insert the data for the test cases with command
+   `make pw_dist_test`
+   
+* Start the server with the command
+   `npm start`
+   
+* The expected results are in the file pw_dist_calc_results.txt
+
+* Navigate to the ProsperWorks page on the app, select pipeline1, click the time distribution tab and submit time range from 2016-01-01 to the present date. Compare with expected results.
