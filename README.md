@@ -66,3 +66,17 @@ The test cases in tests/pw_dist_calc_tests.js test to see whether the opportunit
 * The expected results are in the file pw_dist_calc_results.txt
 
 * Navigate to the ProsperWorks page on the app, select pipeline1, click the time distribution tab and submit time range from 2016-01-01 to the present date. Compare with expected results.
+
+The test cases in tests/pw_count_tests.js test to see whether the number of created/won/lost/abandoned opportunities are counted and displayed correctly. 
+
+* Make sure database tables are created.
+
+* Insert the data for the test cases with command
+   `make pw_count_test`
+   
+* Start the server with command
+   `npm start`
+   
+* The expected results are in the file pw_count_results.txt
+
+* Navigate to the ProsperWorks page on the app, select pipeline1, click the created and closed data tab and submit time range 2017-07-05 to present date. Compare with expected results.
