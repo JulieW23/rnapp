@@ -4,6 +4,7 @@ angular.module('prosperworks', [])
 	$scope.openTab = openTab;
 	$scope.opTimeDistribution = opTimeDistribution;
 	$scope.opActivity = opActivity;
+	$scope.opActivityDetails = opActivityDetails;
 	// get pipelines
 	$http.get('/prosperworks/pipelines')
 	.success((data) => {

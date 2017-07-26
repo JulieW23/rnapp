@@ -13,10 +13,42 @@ body {
 
 .count-heading{
 	padding-top: 20px;
-	padding-right: 10px;
+	/*padding-right: 100px;*/
+	min-width: 200px;
 	font-size: 30px;
 }
 
 .count-subheading{
 	font-size: 20px;
+}
+
+#count_graph {
+	padding-top: 30px;
+	-webkit-animation: fadeEffect 1s;
+    animation: fadeEffect 1s; /* Fading effect takes 1 second */
+}
+
+#value_graph {
+	padding-top: 30px;
+	-webkit-animation: fadeEffect 1s;
+    animation: fadeEffect 1s; /* Fading effect takes 1 second */
+}
+
+#overall-table td{
+	border: 1px solid black;
+	padding: 5px;
+	text-align: center;
+}
+
+table {
+	width:100%;
+}
+
+#value_or_count {
+	padding-bottom: 50px;
+}
+
+#created_closed_table td{
+	padding: 10px;
+	text-align: center;
 }

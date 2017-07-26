@@ -63,38 +63,61 @@
             <input type="submit" ng-click="opActivity(selectedPipeline.id, 'activityFromDate', 'activityToDate')">
           </form>
 
-          <table id="created_closed_layout">
+          <table id="created_closed_layout" style="display: none;">
             <tr>
               <th class="count-heading" colspan="2">Created</th>
               <th class="count-heading" colspan="2">Won</th>
               <th class="count-heading" colspan="2">Lost</th>
               <th class="count-heading" colspan="2">Abandoned</th>
-              <th class="count-heading" colspan="2">Open</th>
             </tr>
             <tr>
-              <td class="count-subheading">Count:</td><td class="count-subheading">Value:</td>
-              <td class="count-subheading">Count:</td><td class="count-subheading">Value:</td>
-              <td class="count-subheading">Count:</td><td class="count-subheading">Value:</td>
-              <td class="count-subheading">Count:</td><td class="count-subheading">Value:</td>
-              <td class="count-subheading">Count:</td><td class="count-subheading">Value:</td>
+              <td class="count-subheading">Value:</td>
+              <td class="num" id="created-value"></td>
+              <td class="count-subheading">Value:</td>
+              <td class="num" id="won-value"></td>
+              <td class="count-subheading">Value:</td>
+              <td class="num" id="lost-value"></td>
+              <td class="count-subheading">Value:</td>
+              <td class="num" id="abandoned-value"></td>
             </tr>
             <tr>
-              <td id="created-count"></td><td id="created-value"></td>
-              <td id="won-count"></td><td id="won-value"></td>
-              <td id="lost-count"></td><td id="lost-value"></td>
-              <td id="abandoned-count"></td><td id="abandoned-value"></td>
-              <td id="open-count"></td><td id="open-value"></td>
+              <td class="count-subheading">Count:</td>
+              <td class="num" id="created-count"></td>
+              <td class="count-subheading">Count:</td>
+              <td class="num" id="won-count"></td>
+              <td class="count-subheading">Count:</td>
+              <td class="num" id="lost-count"></td>
+              <td class="count-subheading">Count:</td>
+              <td class="num" id="abandoned-count"></td>
             </tr>
             <tr>
-              <td class="details" colspan="2">Click to view details</td>
-              <td class="details" colspan="2">Click to view details</td>
-              <td class="details" colspan="2">Click to view details</td>
-              <td class="details" colspan="2">Click to view details</td>
-              <td class="details" colspan="2">Click to view details</td>
+              <td class="details" colspan="2">
+                <button id="created_details" ng-click="opActivityDetails('created')">Click to view details</button>
+              </td>
+              <td class="details" colspan="2">
+                <button id="won_details" ng-click="opActivityDetails('won')">Click to view details</button>
+              </td>
+              <td class="details" colspan="2">
+                <button id="lost_details" ng-click="opActivityDetails('lost')">Click to view details</button>
+              </td>
+              <td class="details" colspan="2">
+                <button id="abandoned_details" ng-click="opActivityDetails('abandoned')">Click to view details</button>
+              </td>
             </tr>
           </table>
 
-          <div id="created_closed_graph"></div>
+          <div id="created_closed_graph_container" style="display: none;">
+
+            <div id="count_graph"></div>
+            <div id="value_graph" style="display: none;"></div>
+
+            <form id="value_or_count" style="text-align: center;">
+              Display chart for: &nbsp;&nbsp;
+              <input style="padding-right: 10px" type="radio" name="y-axis" value="count" checked> Count&nbsp;&nbsp;&nbsp;
+              <input type="radio" name="y-axis" value="value"> Value
+            </form>
+          </div>
+
           <div id="created_closed_table"></div>
 
         </div>

@@ -349,67 +349,7 @@ function generateFigure(idBoard, tabName, fromInput, toInput){
             					data: distribution_data[i].slice(0, last_useful+1)
         					}]
     					}); // end of highcharts 
-
-    					// CALCULATE AVERAGE
-    					var data_array = [];
-    					for (j = 0; j < distribution_data[i].length; j++){
-    						if (distribution_data[i][j].y > 0){
-    							for (x = 0; x < distribution_data[i][j].y; x++){
-    								data_array.push(j);
-    							}
-    						}
-    					}
-    					// console.log(data_array);
-    					var average;
-    					average = Math.round((data_array.reduce(add, 0) / data_array.length) * 100) / 100;
-    					if (!(average >= 0)){
-    						$('#distribution-graph' + [i]).append('<h4 style="text-align: center;">Average: no data in time range</h4>');
-    					}
-    					else{
-    						$('#distribution-graph' + [i]).append('<h4 style="text-align: center;">Average: ' + average + ' days </h4>');
-    					}
-
-    					// CALCULATE STANDARD DEVIATION
-    					var squared_difference = [];
-    					for (j = 0; j < data_array.length; j++){
-    						squared_difference.push((data_array[j] - average) * (data_array[j] - average));
-    					}
-    					var standard_deviation = Math.round((Math.sqrt(squared_difference.reduce(add, 0) / squared_difference.length) * 100)) / 100;
-    					if (!(standard_deviation >= 0)){
-    						$('#distribution-graph' + [i]).append('<h4 style="text-align: center;">Standard Deviation: no data in time range</h4><br><br>');
-    					}
-    					else{
-    						$('#distribution-graph' + [i]).append('<h4 style="text-align: center;">Standard Deviation: ' + standard_deviation + ' days</h4><br><br>');
-    					}
-    					// find minimum number of days
-    					var min_days;
-    					for (z = 0; z < distribution_data[i].length; z++){
-    						if(distribution_data[i][z].y != 0){
-    							min_days = z;
-    							break;
-    						}
-    					}
-    					// max number of days = last_useful (from above, when fixing graph x axis)
-    					// overall table
-    					averages_table.push([list_names[i], average, standard_deviation, min_days, last_useful]);
-    					$('#overall-table').empty();
-    					$('#overall-table').append("<h4>Average and Standard Deviation for the Number of Days Cards Spend in Each List:</h4>");
-    					var result = "<table>";
-						for (x = 0; x < averages_table.length; x++){
-							result += "<tr>";
-							for (y = 0; y < averages_table[x].length; y++){
-								if(x > 0 && y > 0 && !(averages_table[x][y] >= 0)){
-									result += "<td>no data</td>";
-								}
-								else{
-									result += "<td>" + averages_table[x][y] + "</td>";
-								}
-							}
-							result += "</tr>";
-						}
-						result += "</table>";
-						$('#overall-table').append(result);
-						$('#overall-table').append("<br><br><h3>Graphs for Each List:</h3>");
+						calcAverage(distribution_data, averages_table, last_useful, list_names, ' Cards ', ' List ');
 					} // end of for each list
 				} // end of (if) display distribution graph
 			}); // end of calculation section
