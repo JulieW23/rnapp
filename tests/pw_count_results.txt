@@ -5,19 +5,19 @@ Lost: 3
 Abandoned: 2
 
 ps1:
-Created: 4
-Won: 2
-Lost: 1
-Abandoned: 0
+Created: 4, $50000
+Won: 2, $34000
+Lost: 1, $22000
+Abandoned: 0, $0
 
 ps2:
-Created: 3
-Won: 1
-Lost: 1
-Abandoned: 1
+Created: 3, $31100
+Won: 1, $1000
+Lost: 1, $30000
+Abandoned: 1, $30000
 
 ps3:
-Created: 2
-Won: 0
-Lost: 1
-Abandoned: 1
+Created: 2, $40100
+Won: 0, $0
+Lost: 1, $100
+Abandoned: 1, $1000

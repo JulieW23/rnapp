@@ -43,15 +43,15 @@ client.query("INSERT INTO Opportunity VALUES ('oid1', 'oid1', 'member1', \
 	'None', 'ps1', 'Abandoned', 10, '2017-07-01 00:00:00')");
 // oid2
 client.query("INSERT INTO Opportunity VALUES ('oid2', 'oid2', 'member1', \
-	'company1', 'company1', 'opportunity details', null, 100, 'pipeline1', \
+	'company1', 'company1', 'opportunity details', null, 15000, 'pipeline1', \
 	'None', 'ps1', 'Open', 10, '2017-07-06 00:00:00')");
 // oid3
 client.query("INSERT INTO Opportunity VALUES ('oid3', 'oid3', 'member1', \
-	'company1', 'company1', 'opportunity details', null, 100, 'pipeline1', \
+	'company1', 'company1', 'opportunity details', null, 12000, 'pipeline1', \
 	'None', 'ps1', 'Won', 10, '2017-07-06 00:00:00')");
 // oid4
 client.query("INSERT INTO Opportunity VALUES ('oid4', 'oid4', 'member1', \
-	'company1', 'company1', 'opportunity details', null, 100, 'pipeline1', \
+	'company1', 'company1', 'opportunity details', null, 22000, 'pipeline1', \
 	'None', 'ps1', 'Lost', 10, '2017-07-06 00:00:00')");
 // ps2
 // oid5
@@ -60,16 +60,16 @@ client.query("INSERT INTO Opportunity VALUES ('oid5', 'oid5', 'member1', \
 	'None', 'ps2', 'Open', 10, '2017-07-06 00:00:00')");
 // oid6
 client.query("INSERT INTO Opportunity VALUES ('oid6', 'oid6', 'member1', \
-	'company1', 'company1', 'opportunity details', null, 100, 'pipeline1', \
+	'company1', 'company1', 'opportunity details', null, 1000, 'pipeline1', \
 	'None', 'ps2', 'Won', 10, '2017-07-06 00:00:00')");
 // oid7
 client.query("INSERT INTO Opportunity VALUES ('oid7', 'oid7', 'member1', \
-	'company1', 'company1', 'opportunity details', null, 100, 'pipeline1', \
+	'company1', 'company1', 'opportunity details', null, 30000, 'pipeline1', \
 	'None', 'ps2', 'Open', 10, '2017-07-06 00:00:00')");
 // ps3
 // oid8
 client.query("INSERT INTO Opportunity VALUES ('oid8', 'oid8', 'member1', \
-	'company1', 'company1', 'opportunity details', null, 100, 'pipeline1', \
+	'company1', 'company1', 'opportunity details', null, 40000, 'pipeline1', \
 	'None', 'ps3', 'Open', 10, '2017-07-06 00:00:00')");
 // oid9
 client.query("INSERT INTO Opportunity VALUES ('oid9', 'oid9', 'member1', \
@@ -77,7 +77,7 @@ client.query("INSERT INTO Opportunity VALUES ('oid9', 'oid9', 'member1', \
 	'None', 'ps3', 'Lost', 10, '2017-07-06 00:00:00')");
 // oid10
 client.query("INSERT INTO Opportunity VALUES ('oid10', 'oid10', 'member1', \
-	'company1', 'company1', 'opportunity details', null, 100, 'pipeline1', \
+	'company1', 'company1', 'opportunity details', null, 1000, 'pipeline1', \
 	'None', 'ps3', 'Open', 10, '2017-07-06 00:00:00')");
 
 

@@ -142,4 +142,3 @@ router.get('/abandoned_actions/:stageid/:fromDate/:toDate', (req, res, next) => 
     "'::timestamp AND '" + toDate + "'::timestamp";
     getHelper(req, res, next, qs);
 });
-

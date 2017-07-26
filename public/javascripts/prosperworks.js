@@ -202,7 +202,7 @@ function opActivityDetails(status){
 			},
 		series: [{
 			showInLegend: false,
-			name: 'Count',
+			name: 'Value',
 			data: value_data
 		}]
 	});	// end of highcharts
@@ -217,7 +217,12 @@ function opActivityDetails(status){
 	for (i = 0; i < table_cells.length; i++){
 		table += "<tr>";
 		for (j = 0; j < table_cells[i].length; j++){
-			table += "<td>" + table_cells[i][j] + "</td>";
+			if(i != 0 && j == 2){
+				table += "<td>$" + table_cells[i][j] + "</td>"
+			}
+			else{
+				table += "<td>" + table_cells[i][j] + "</td>";
+			}
 		}
 		table += "</tr>";
 	}

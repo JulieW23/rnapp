@@ -94,7 +94,8 @@ function add(a, b){
 }
 
 
-function calcAverage(distribution_data, averages_table, last_useful, stage_names, cards, list){
+function calcAverage(distribution_data, averages_table, last_useful, 
+stage_names, cards, list){
 	// CALCULATE AVERAGE
 	var data_array = [];
 	for (j = 0; j < distribution_data[i].length; j++){
@@ -105,25 +106,34 @@ function calcAverage(distribution_data, averages_table, last_useful, stage_names
 		}
 	}
 	var average;
-	average = Math.round((data_array.reduce(add, 0) / data_array.length) * 100) / 100;
+	average = Math.round((data_array.reduce(add, 0) / 
+	data_array.length) * 100) / 100;
 	if (!(average >= 0)){
-		$('#distribution-graph' + [i]).append('<h4 style="text-align: center;">Average: no data in time range</h4>');
+		$('#distribution-graph' + [i]).append('<h4 style="text-align: \
+		center;">Average: no data in time range</h4>');
 	}
 	else{
-		$('#distribution-graph' + [i]).append('<h4 style="text-align: center;">Average: ' + average + ' days </h4>');
+		$('#distribution-graph' + [i]).append('<h4 style="text-align: \
+		center;">Average: ' + average + ' days </h4>');
 	}
 
 	// CALCULATE STANDARD DEVIATION
 	var squared_difference = [];
 	for (j = 0; j < data_array.length; j++){
-		squared_difference.push((data_array[j] - average) * (data_array[j] - average));
+		squared_difference.push((data_array[j] - average) * (data_array[j] - 
+		average));
 	}
-	var standard_deviation = Math.round((Math.sqrt(squared_difference.reduce(add, 0) / squared_difference.length) * 100)) / 100;
+	var standard_deviation = 
+	Math.round((Math.sqrt(squared_difference.reduce(add, 0) / 
+	squared_difference.length) * 100)) / 100;
 	if (!(standard_deviation >= 0)){
-		$('#distribution-graph' + [i]).append('<h4 style="text-align: center;">Standard Deviation: no data in time range</h4><br><br>');
+		$('#distribution-graph' + [i]).append('<h4 style="text-align: \
+		center;">Standard Deviation: no data in time range</h4><br><br>');
 	}
 	else{
-		$('#distribution-graph' + [i]).append('<h4 style="text-align: center;">Standard Deviation: ' + standard_deviation + ' days</h4><br><br>');
+		$('#distribution-graph' + [i]).append('<h4 style="text-align: \
+		center;">Standard Deviation: ' + standard_deviation + 
+		' days</h4><br><br>');
 	}
 	// find minimum number of days
 	var min_days;
@@ -135,9 +145,11 @@ function calcAverage(distribution_data, averages_table, last_useful, stage_names
 	}
 	// max number of days = last_useful (from above, when fixing graph x axis)
 	// overall table
-	averages_table.push([stage_names[i], average, standard_deviation, min_days, last_useful]);
+	averages_table.push([stage_names[i], average, standard_deviation, 
+	min_days, last_useful]);
 	$('#overall-table').empty();
-	$('#overall-table').append("<h4>Average and Standard Deviation for the Number of Days" + cards + "Spend in Each" +  list + ":</h4>");
+	$('#overall-table').append("<h4>Average and Standard Deviation for the \
+	Number of Days" + cards + "Spend in Each" +  list + ":</h4>");
 	var result = "<table>";
 	for (x = 0; x < averages_table.length; x++){
 		result += "<tr>";
