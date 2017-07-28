@@ -134,7 +134,7 @@ name | the name of the stage | <ul><li>string, maximum 100 characters</li><li>ca
 pipeline_id | the id of the pipeline that this stage belongs to | <ul><li>string, maximum 50 characters</li><li>references Pipeline(id)</li></ul>
 win_probability | the probability of a win in this stage | <ul><li>integer</li></ul>
 
-### Loss Reason Table
+### LossReason Table
 Table for storing ProsperWorks loss reason information. Each row is the information for one less reason.
 
 Column Name | Description | Details
