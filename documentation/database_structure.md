@@ -1,5 +1,24 @@
 # Database Structure
 
+## Contents
+* [Trello Tables](https://github.com/JulieW23/rnapp/blob/master/documentation/database_structure.md#modelstrellojs)
+   * [Board Table](https://github.com/JulieW23/rnapp/blob/master/documentation/database_structure.md#board-table)
+   * [List Table](https://github.com/JulieW23/rnapp/blob/master/documentation/database_structure.md#list-table)
+   * [Card Table](https://github.com/JulieW23/rnapp/blob/master/documentation/database_structure.md#card-table)
+   * [Member Table](https://github.com/JulieW23/rnapp/blob/master/documentation/database_structure.md#member-table)
+   * [Action Table](https://github.com/JulieW23/rnapp/blob/master/documentation/database_structure.md#action-table)
+* [ProsperWorks Tables](https://github.com/JulieW23/rnapp/blob/master/documentation/database_structure.md#modelsprosperworksjs)
+   * [PWAccount Table](https://github.com/JulieW23/rnapp/blob/master/documentation/database_structure.md#pwaccount-table)
+   * [PWMember Table](https://github.com/JulieW23/rnapp/blob/master/documentation/database_structure.md#pwmember-table)
+   * [Company Table](https://github.com/JulieW23/rnapp/blob/master/documentation/database_structure.md#company-table)
+   * [Pipeline Table](https://github.com/JulieW23/rnapp/blob/master/documentation/database_structure.md#pipeline-table)
+   * [PipelineStage Table](https://github.com/JulieW23/rnapp/blob/master/documentation/database_structure.md#pipelinestage-table)
+   * [LossReason Table](https://github.com/JulieW23/rnapp/blob/master/documentation/database_structure.md#lossreason-table)
+   * [Opportunity Table](https://github.com/JulieW23/rnapp/blob/master/documentation/database_structure.md#opportunity-table)
+   * [PWAction Table](https://github.com/JulieW23/rnapp/blob/master/documentation/database_structure.md#pwaction-table)
+* [System Tables](https://github.com/JulieW23/rnapp/blob/master/documentation/database_structure.md#modelssystemjs)
+   * [SystemAccount Table](https://github.com/JulieW23/rnapp/blob/master/documentation/database_structure.md#systemaccount-table)
+
 ## /models/trello.js
 ### Board Table
 Table for storing Trello board information. Each row is the information for one Trello board.
