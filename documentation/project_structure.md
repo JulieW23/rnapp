@@ -3,6 +3,9 @@
 ## app.js
    
    The main file containing server code.
+   
+## config.js
+   Configurations for PostgreSQL, Trello and ProsperWorks.
   
 ## /models
 
