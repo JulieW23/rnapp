@@ -62,3 +62,7 @@ table {
 .collapse{
 	font-size: 12px;
 }
+
+#list-graph{
+	padding-top: 20px;
+}

@@ -1,166 +1,183 @@
 <!DOCTYPE html>
 <html ng-app="prosperworks">
-  	<head>
-    	<title><%= title %></title>
-    	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-    	<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" media="screen">
-    	<link rel='stylesheet' href='/stylesheets/style.css' />
-    	<link rel='stylesheet' href='/stylesheets/prosperworks.css' />
-  	</head>
+	<head>
+  	<title><%= title %></title>
+  	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  	<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" media="screen">
+  	<link rel='stylesheet' href='/stylesheets/style.css' />
+  	<link rel='stylesheet' href='/stylesheets/prosperworks.css' />
+	</head>
 
-  	<body ng-controller="pwController">
-  		<div class="container">
-    		<h1><%= title %></h1>
+  <body ng-controller="pwController">
+		<div class="container">
+  		<h1><%= title %></h1>
 
-        <!-- <button class="btn" id="reload_button" onclick="reload()">Load Data</button> -->
+      <button class="btn" id="reload_button" onclick="reload()">Load Data</button>
 
-        <!-- Pipeline selection -->
-        <form class="form-horizontal" id="boards_form">
-          <div class="form-group">
-            <label class="control-label">Select Pipeline</label>
-            <select class="form-control" id="boards" ng-model="selectedPipeline" ng-options="pipeline.name for pipeline in pipelinesData" ng-change="pipelineSelected(selectedPipeline.id)"></select>
-          </div>
+      <!-- Pipeline selection -->
+      <form class="form-horizontal" id="boards_form">
+        <div class="form-group">
+          <label class="control-label">Select Pipeline</label>
+          <select class="form-control" id="boards" ng-model="selectedPipeline" ng-options="pipeline.name for pipeline in pipelinesData" ng-change="pipelineSelected(selectedPipeline.id)"></select>
+        </div>
+      </form>
+
+      <!-- Selected pipeline name -->
+      <h2 id="hidden-pipeline_title" style="display: none;">
+        {{selectedPipeline.name}}
+      </h2>
+
+      <!-- Tabs navigation -->
+      <div class="tab" id="hidden_tab" style="display: none;">
+        <!-- how long opportunities were in each pipeline -->
+        <button class="tablinks" ng-click="openTab(event, 'time_distribution', selectedPipeline.id)">Time Distribution</button>
+        <!-- how many cards were created/won/lost/abandoned within timeframe -->
+        <button class="tablinks" ng-click="openTab(event, 'created_closed_data', selectedPipeline.id)">Opportunity Status Data</button>
+        <!-- user activity -->
+        <button class="tablinks" ng-click="openTab(event, 'user_activity', selectedPipeline.id)">User Activity</button>
+      </div>
+
+      <!-- Time Distribution Tab -->
+      <div class="tabcontent" id="time_distribution">
+        <h3>Time Distribution</h3>
+
+        <!-- form to select date range -->
+        <form>
+          Select time range to view:  <br><br>
+          From: <input type="date" name="from" id="distributionFromDate" class="date_picker">
+          To: <input type="date" name="to" id="distributionToDate" class="date_picker">
+          <input type="submit" ng-click="opTimeDistribution(selectedPipeline.id, 'distributionFromDate', 'distributionToDate')">
         </form>
 
-        <!-- Selected pipeline name -->
-        <h2 id="hidden-pipeline_title" style="display: none;">
-          {{selectedPipeline.name}}
-        </h2>
+        <!-- container for averages/standard deviations table -->
+        <div id="overall-table"></div>
 
-        <!-- Tabs navigation -->
-        <div class="tab" id="hidden_tab" style="display: none;">
-          <!-- how long opportunities were in each pipeline -->
-          <button class="tablinks" ng-click="openTab(event, 'time_distribution', selectedPipeline.id)">Time Distribution</button>
-          <!-- how many cards were created/won/lost/abandoned within timeframe -->
-          <button class="tablinks" ng-click="openTab(event, 'created_closed_data', selectedPipeline.id)">Created and Closed Data</button>
-          <!-- user activity -->
-          <button class="tablinks" ng-click="openTab(event, 'user_activity', selectedPipeline.id)">User Activity</button>
-        </div>
+        <!-- conatiner for graphs -->
+        <div id="distribution-graph"></div>
 
-        <!-- Time Distribution Tab -->
-        <div class="tabcontent" id="time_distribution">
-          <h3>Time Distribution</h3>
+      </div>
 
-          <form>
-            From: <input type="date" name="from" id="distributionFromDate" class="date_picker">
-            To: <input type="date" name="to" id="distributionToDate" class="date_picker">
-            <input type="submit" ng-click="opTimeDistribution(selectedPipeline.id, 'distributionFromDate', 'distributionToDate')">
+      <!-- Created and Closed Data Tab -->
+      <div class="tabcontent" id="created_closed_data">
+        <h3>Created and Closed Data</h3>
+
+        <!-- form to select date range -->
+        <form>
+          Select time range to view: <br><br>
+          From: <input type="date" name="from" id="activityFromDate" class="date_picker">
+          To: <input type="date" name="to" id="activityToDate" class="date_picker">
+          <input type="submit" ng-click="opActivity(selectedPipeline.id, 'activityFromDate', 'activityToDate')">
+        </form>
+
+        <!-- table to get the layout for the total counts of created/won/lost/abandoned opportunities to display correctly -->
+        <table id="created_closed_layout" style="display: none;">
+          <!-- Headings row: Created/Won/Lost/Abandoned -->
+          <tr>
+            <th class="count-heading" colspan="2">Created</th>
+            <th class="count-heading" colspan="2">Won</th>
+            <th class="count-heading" colspan="2">Lost</th>
+            <th class="count-heading" colspan="2">Abandoned</th>
+          </tr>
+          <!-- 'Value' subheadings and actual monetary value row -->
+          <tr>
+            <td class="count-subheading">Value:</td>
+            <td class="num" id="created-value"></td>
+            <td class="count-subheading">Value:</td>
+            <td class="num" id="won-value"></td>
+            <td class="count-subheading">Value:</td>
+            <td class="num" id="lost-value"></td>
+            <td class="count-subheading">Value:</td>
+            <td class="num" id="abandoned-value"></td>
+          </tr>
+          <!-- 'Count' subheadings and actual number count row -->
+          <tr>
+            <td class="count-subheading">Count:</td>
+            <td class="num" id="created-count"></td>
+            <td class="count-subheading">Count:</td>
+            <td class="num" id="won-count"></td>
+            <td class="count-subheading">Count:</td>
+            <td class="num" id="lost-count"></td>
+            <td class="count-subheading">Count:</td>
+            <td class="num" id="abandoned-count"></td>
+          </tr>
+          <!-- Click for details row -->
+          <tr>
+            <td class="details" colspan="2">
+              <button id="created_details" ng-click="opActivityDetails('created')">Click to view details</button>
+            </td>
+            <td class="details" colspan="2">
+              <button id="won_details" ng-click="opActivityDetails('won')">Click to view details</button>
+            </td>
+            <td class="details" colspan="2">
+              <button id="lost_details" ng-click="opActivityDetails('lost')">Click to view details</button>
+            </td>
+            <td class="details" colspan="2">
+              <button id="abandoned_details" ng-click="opActivityDetails('abandoned')">Click to view details</button>
+            </td>
+          </tr>
+        </table>
+
+        <!-- container for detailed graphs -->
+        <div id="created_closed_graph_container" style="display: none;">
+          <!-- container for detailed count graph -->
+          <div id="count_graph"></div>
+          <!-- container for detailed value graphe -->
+          <div id="value_graph" style="display: none;"></div>
+
+          <!-- selection to display either count or value graph -->
+          <form id="value_or_count" style="text-align: center;">
+            Display chart for: &nbsp;&nbsp;
+            <input style="padding-right: 10px" type="radio" name="y-axis" value="count" checked> Count&nbsp;&nbsp;&nbsp;
+            <input type="radio" name="y-axis" value="value"> Value&nbsp;&nbsp;&nbsp;
+            <!-- <input type="radio" name="y-axis" value="Time"> Time -->
           </form>
-
-          <div id="overall-table"></div>
-
-          <div id="distribution-graph"></div>
-
-        </div>
-
-        <!-- Created and Closed Data Tab -->
-        <div class="tabcontent" id="created_closed_data">
-          <h3>Created and Closed Data</h3>
-
-          <form>
-            From: <input type="date" name="from" id="activityFromDate" class="date_picker">
-            To: <input type="date" name="to" id="activityToDate" class="date_picker">
-            <input type="submit" ng-click="opActivity(selectedPipeline.id, 'activityFromDate', 'activityToDate')">
-          </form>
-
-          <table id="created_closed_layout" style="display: none;">
-            <tr>
-              <th class="count-heading" colspan="2">Created</th>
-              <th class="count-heading" colspan="2">Won</th>
-              <th class="count-heading" colspan="2">Lost</th>
-              <th class="count-heading" colspan="2">Abandoned</th>
-            </tr>
-            <tr>
-              <td class="count-subheading">Value:</td>
-              <td class="num" id="created-value"></td>
-              <td class="count-subheading">Value:</td>
-              <td class="num" id="won-value"></td>
-              <td class="count-subheading">Value:</td>
-              <td class="num" id="lost-value"></td>
-              <td class="count-subheading">Value:</td>
-              <td class="num" id="abandoned-value"></td>
-            </tr>
-            <tr>
-              <td class="count-subheading">Count:</td>
-              <td class="num" id="created-count"></td>
-              <td class="count-subheading">Count:</td>
-              <td class="num" id="won-count"></td>
-              <td class="count-subheading">Count:</td>
-              <td class="num" id="lost-count"></td>
-              <td class="count-subheading">Count:</td>
-              <td class="num" id="abandoned-count"></td>
-            </tr>
-            <tr>
-              <td class="details" colspan="2">
-                <button id="created_details" ng-click="opActivityDetails('created')">Click to view details</button>
-              </td>
-              <td class="details" colspan="2">
-                <button id="won_details" ng-click="opActivityDetails('won')">Click to view details</button>
-              </td>
-              <td class="details" colspan="2">
-                <button id="lost_details" ng-click="opActivityDetails('lost')">Click to view details</button>
-              </td>
-              <td class="details" colspan="2">
-                <button id="abandoned_details" ng-click="opActivityDetails('abandoned')">Click to view details</button>
-              </td>
-            </tr>
-          </table>
-
-          <div id="created_closed_graph_container" style="display: none;">
-
-            <div id="count_graph"></div>
-            <div id="value_graph" style="display: none;"></div>
-
-            <form id="value_or_count" style="text-align: center;">
-              Display chart for: &nbsp;&nbsp;
-              <input style="padding-right: 10px" type="radio" name="y-axis" value="count" checked> Count&nbsp;&nbsp;&nbsp;
-              <input type="radio" name="y-axis" value="value"> Value
-            </form>
-          </div>
-
+          <!-- container for detailed count and value table -->
           <div id="created_closed_table"></div>
-
         </div>
 
-        <!-- User Activity Tab -->
-        <div class="tabcontent" id="user_activity">
-          <h3>User Activity</h3>
+      </div>
 
-          <form>
-            From: <input type="date" name="from" id="distributionFromDate" class="date_picker">
-            To: <input type="date" name="to" id="distributionToDate" class="date_picker">
-            <input type="submit">
-          </form>
+      <!-- User Activity Tab -->
+      <div class="tabcontent" id="user_activity">
+        <h3>User Activity</h3>
 
-          <div></div>
+        <!-- <form>
+          From: <input type="date" name="from" id="distributionFromDate" class="date_picker">
+          To: <input type="date" name="to" id="distributionToDate" class="date_picker">
+          <input type="submit">
+        </form> -->
 
-        </div>
-        
-    	</div>
+        <div></div>
 
-    	<!-- include jquery -->
-    	<script src="//code.jquery.com/jquery-2.2.4.min.js" type="text/javascript"></script>
-    	<!-- include bootstrap js -->
-    	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-   		<!-- include angular js -->
-    	<script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.6/angular.min.js"></script>
-    	<!-- include angular controller for this page -->
-    	<script src="javascripts/prosperworksController.js"></script>
-    	<!-- include front end js -->
-    	<script src="javascripts/prosperworks.js"></script>
-      <script src="javascripts/shared_scripts.js"></script>
-      <!-- include highcharts scripts -->
-      <script src="https://code.highcharts.com/highcharts.js"></script>
-      <script src="https://code.highcharts.com/modules/exporting.js"></script>
-      <!-- Additional files for the Highslide popup effect -->
-      <script src="https://www.highcharts.com/media/com_demo/js/highslide-full.min.js"></script>
-      <script src="https://www.highcharts.com/media/com_demo/js/highslide.config.js" charset="utf-8"></script>
-      <!-- include jquery ui for date picker in non-chrome browsers -->
-      <script src = "https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
-      <!-- stylesheet for jquery ui -->
-      <link href = "https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css" rel = "stylesheet">
-      <!-- include async handling -->
-      <script type="text/javascript" src="https://cdn.jsdelivr.net/async/2.4.0/async.js"></script>
+      </div>
+      
+  	</div>
+
+  	<!-- include jquery -->
+  	<script src="//code.jquery.com/jquery-2.2.4.min.js" type="text/javascript"></script>
+  	<!-- include bootstrap js -->
+  	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+ 		<!-- include angular js -->
+  	<script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.6/angular.min.js"></script>
+  	<!-- include angular controller for this page -->
+  	<script src="javascripts/prosperworksController.js"></script>
+  	<!-- include front end js -->
+  	<script src="javascripts/pw_count_status.js"></script>
+    <script src="javascripts/shared_scripts.js"></script>
+    <script src="javascripts/pw_time_distribution.js"></script>
+    <!-- include highcharts scripts -->
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <!-- Additional files for the Highslide popup effect -->
+    <script src="https://www.highcharts.com/media/com_demo/js/highslide-full.min.js"></script>
+    <script src="https://www.highcharts.com/media/com_demo/js/highslide.config.js" charset="utf-8"></script>
+    <link rel="stylesheet" type="text/css" href="https://www.highcharts.com/media/com_demo/css/highslide.css" />
+    <!-- include jquery ui for date picker in non-chrome browsers -->
+    <script src = "https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+    <!-- stylesheet for jquery ui -->
+    <link href = "https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css" rel = "stylesheet">
+    <!-- include async handling -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/async/2.4.0/async.js"></script>
 
   </body>
 

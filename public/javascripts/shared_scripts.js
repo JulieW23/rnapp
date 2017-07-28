@@ -94,6 +94,8 @@ function add(a, b){
 }
 
 
+// calculates average and standard deviation for pw + trello time distribution data
+// and displays it in a table
 function calcAverage(distribution_data, averages_table, last_useful, 
 stage_names, cards, list){
 	// CALCULATE AVERAGE

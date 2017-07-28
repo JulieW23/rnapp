@@ -98,12 +98,15 @@
           	<div id="list-graph-tab" class="tabcontent" style="width:100%; height:400px;">
             	<h4>Graphs for the average time that cards spend in each list</h4>
 
+              <!-- Form to select date range -->
               <form>
+                Select time range to view: <br><br>
                 From: <input type="date" name="from" id="listFromDate" class="date_picker">
                 To: <input type="date" name="to" id="listToDate" class="date_picker">
                 <input type="submit" ng-click="generateFigure(selectedBoard.id, 'list-graph-tab', 'listFromDate', 'listToDate')">
               </form>
 
+              <!-- container for graph -->
             	<div id="list-graph">
             	</div>
 
@@ -113,15 +116,19 @@
             <div id="distribution-graph-tab" class="tabcontent" style="width:100%; height:400px;">
                 <h4>Distribution graphs</h4>
 
+                <!-- form to select date range -->
                 <form>
+                  Select time range to view: <br><br>
                   From: <input type="date" name="from" id="distributionFromDate" class="date_picker">
                   To: <input type="date" name="to" id="distributionToDate" class="date_picker">
                   <input type="submit" ng-click="generateFigure(selectedBoard.id, 'distribution-graph-tab', 'distributionFromDate', 'distributionToDate')">
                 </form>
 
+                <!-- container for averages/standard deviation table -->
                 <div id="overall-table">
                 </div>
 
+                <!-- container for graphs -->
                 <div id="distribution-graph">
                 </div>
             </div>
@@ -130,12 +137,15 @@
             <div id="distribution-table" class="tabcontent">
               <h4>Time each card spends in each list (days)</h4>
               
+              <!-- form to select date range -->
               <form>
+                Select time range to view: <br><br>
                 From: <input type="date" name="from" id="tableFromDate" class="date_picker">
                 To: <input type="date" name="to" id="tableToDate" class="date_picker">
                 <input type="submit" ng-click="generateFigure(selectedBoard.id, 'distribution-table', 'tableFromDate', 'tableToDate')">
               </form>
 
+              <!-- container for talbe -->
               <div id="table">
               </div>
 
@@ -162,13 +172,14 @@
       <!-- Additional files for the Highslide popup effect -->
       <script src="https://www.highcharts.com/media/com_demo/js/highslide-full.min.js"></script>
       <script src="https://www.highcharts.com/media/com_demo/js/highslide.config.js" charset="utf-8"></script>
+      <link rel="stylesheet" type="text/css" href="https://www.highcharts.com/media/com_demo/css/highslide.css" />
       <!-- include jquery ui for date picker in non-chrome browsers -->
       <script src = "https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
       <!-- stylesheet for jquery ui -->
       <link href = "https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css" rel = "stylesheet">
       <!-- include async handling -->
       <script type="text/javascript" src="https://cdn.jsdelivr.net/async/2.4.0/async.js"></script>
-      <link rel="stylesheet" type="text/css" href="https://www.highcharts.com/media/com_demo/css/highslide.css" />
+      
 
   </body>
 

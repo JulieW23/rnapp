@@ -2,7 +2,7 @@ body {
 	min-width: 1000px;
 }
 
-#reload-button {
+#reload_button {
 	float: right;
 	margin-bottom: 3px;
 }
@@ -11,9 +11,12 @@ body {
 	padding-right: 20px;
 }
 
+.num {
+	font-size: 15px;
+}
+
 .count-heading{
 	padding-top: 20px;
-	/*padding-right: 100px;*/
 	min-width: 200px;
 	font-size: 30px;
 }
@@ -46,6 +49,10 @@ table {
 
 #value_or_count {
 	padding-bottom: 50px;
+}
+
+#created_closed_table{
+	padding-top: 10px;
 }
 
 #created_closed_table td{
