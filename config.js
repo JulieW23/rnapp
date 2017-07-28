@@ -22,6 +22,7 @@ module.exports = {
 	/* =========================================================
 	// ProsperWorks
 	============================================================ */
+	// instructions on how to generate api key here:
 	// https://www.prosperworks.com/developer_api/token_generation
 	pw_api_key: "e537e1eae298dfd1efd19cf758383dc2",
 	pw_email: "tacobunnies23@gmail.com"
