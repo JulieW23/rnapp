@@ -6,6 +6,21 @@
    
 ## config.js
    Configurations for PostgreSQL, Trello and ProsperWorks.
+   
+## Makefile
+   Makes commands for making database tables and inserting test data more convenient.
+   
+   `Make tables`: creates all database tables
+   
+   `make trello_test`: equivalent of `node tests/trello_tests.js`
+   
+   `make pw_db_test`: equivalent of `node tests/pw_actions_tests.js`
+   
+   `make pw_dist_test`: equivalent of `node tests/pw_dist_calc_tests.js`
+   
+   `make pw_count_test`: equivalent of `node tests/pw_count_tests.js`
+   
+   
   
 ## /models
 
