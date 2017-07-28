@@ -24,3 +24,5 @@
 ## [Database Structure](https://github.com/JulieW23/rnapp/blob/master/documentation/database_structure.md)
 
 ## [Running Tests](https://github.com/JulieW23/rnapp/blob/master/documentation/running_tests.md)
+
+## [Backend Workflows](https://github.com/JulieW23/rnapp/blob/master/documentation/workflows.md)
