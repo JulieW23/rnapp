@@ -3,7 +3,6 @@
 ## app.js
    
    The main file containing server code.
-   It also contains the code for retrieving data from Trello etc. and storing the data into the app's own database.
   
 ## /models
 
@@ -13,6 +12,8 @@
    
    /models/prosperworks.js - creates database tables to store data from ProsperWorks.
    
+   /models/system.js - creates table to store system account info. *login system not implemented
+   
 ## /public
 
    This directory contains all the front end css and javascript code.
@@ -21,7 +22,9 @@
    
    /public/javascripts/trelloController.js - AngularJS controller for the Trello report page.
    
-   /public/javascripts/prosperworks.js - main javascript for the ProsperWorks page.
+   /public/javascripts/pw_count_status.js - javascript for counting the number of created/won/lost/abandoned opportunities in ProsperWorks.
+   
+   /public/javascripts/pw_time_distribution.js - javascript for calculating the time that opportunities spend in each stage (ProsperWorks).
    
    /public/javascripts/prosperworksController.js - AngularJS controller for the ProsperWorks page.
    
@@ -35,11 +38,17 @@
 
    This directory contains all the views (front end html) for this project.
    
+   /views/createAccount.ejs - create an account page *create account feature not implemented
+   
    /views/index.ejs - home page
+   
+   /views/login.ejs - login page *login feature not implemented
    
    /views/trello.ejs - Trello report page
    
-   /views/prosperworks.ejs - ProsperWorks page
+   /views/prosperworks_account.ejs - *not used. Supposed to be the page for connecting to ProsperWorks API to get/update data after the app's own login system has been implemented.
+   
+   /views/prosperworks.ejs - ProsperWorks report page
    
    /views/error.ejs - error page
    
@@ -47,11 +56,17 @@
 
    This directory contains all the defined endpoints for database queries and routes for the app.
    
+   /routes/createAccount.js - renders create account page. *create account feature not implemented
+   
    /routes/index.js - renders the home page.
+   
+   /routes/login.js - renders te login page. *login feature not implemented
    
    /routes/trello.js - renders the Trello report page, and also defines endpoints for database queries for Trello data.
    
    /routes/prosperworks.js - renders the Prosperworks page, and also defines endpoints for database queries for ProsperWorks data.
+   
+   /routes/prosperworks_account.js - *not used. Renders the page for connecting to ProsperWorks API to get/update data after the app's own login system has been implemented.
    
 ## /login
 
@@ -59,18 +74,18 @@
    
    /login/trello_oauth.js - contains code for Trello login and putting data from Trello into the app's database.
    
-   /login/prosperworks.js - contains code for putting data from ProsperWorks into the app's database.
+   /login/prosperworks.js - contains code for putting data from ProsperWorks API into the app's database.
    
 ## /tests
-   This directory contains tests for the app.
+   This directory contains tests for the app. Instructions for running tests are in README.md
    
-   /tests/trello_tests.js - test cases for data calculation.
+   /tests/trello_tests.js - test cases for Trello data calculation. 
    
-   * After creating the database tables (by running "node models/trello.js), the data for the test cases can be inserted into the database by running the command "node tests/trello_tests.js". 
+   /tests/pw_actions_tests.js - test cases for ProsperWorks data calculation.
    
-   * The expected calculation results are in the file trello_tests_results.txt
+   /tests/pw_count_tests.js - test cases for ProsperWorks data calculation.
    
-   * Go to http://localhost:3000/trello?oauth_token=accesstoken1 to use the app with the inserted test data.
+   /tests/pw_dist_calc_tests.js - test cases for ProsperWorks data calculation.
    
 ## /bin
 
