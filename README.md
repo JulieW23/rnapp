@@ -1,5 +1,4 @@
 # rnapp
-
 ## Dependencies
 * npm - https://www.npmjs.com/
 * Node.js - https://nodejs.org/en/
@@ -20,3 +19,8 @@
    
    `npm start` to start the server
  
+## [Project Structure](https://github.com/JulieW23/rnapp/blob/master/documentation/project_structure.md)
+
+## [Database Structure](https://github.com/JulieW23/rnapp/blob/master/documentation/database_structure.md)
+
+## [Running Tests](https://github.com/JulieW23/rnapp/blob/master/documentation/running_tests.md)
