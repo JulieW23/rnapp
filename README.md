@@ -1,4 +1,6 @@
 # rnapp
+rnapp is a web application that is integrated with Trello and ProsperWorks APIs. It displays information about your account's activity in order to track productivity. 
+
 ## Dependencies
 * npm - https://www.npmjs.com/
 * Node.js - https://nodejs.org/en/
